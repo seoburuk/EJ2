@@ -112,3 +112,4 @@ docker-compose down
 # 볼륨까지 삭제
 docker-compose down -v
 ```
+# EJ2
