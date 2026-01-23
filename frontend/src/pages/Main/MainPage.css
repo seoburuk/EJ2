@@ -118,10 +118,18 @@
 .post-item-meta {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   font-size: 12px;
   color: #586069;
   flex-wrap: wrap;
+}
+
+.post-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .post-item-author {
@@ -129,18 +137,25 @@
   font-weight: 500;
 }
 
+.post-item-separator {
+  color: #d1d5da;
+  font-weight: 400;
+}
+
 .post-item-time {
   color: #6a737d;
+  white-space: nowrap;
 }
 
 .post-item-stats {
   display: flex;
   gap: 10px;
-  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .post-item-stats span {
   color: #586069;
+  white-space: nowrap;
 }
 
 .no-posts {

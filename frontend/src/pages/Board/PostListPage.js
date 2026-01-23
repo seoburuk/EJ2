@@ -171,7 +171,7 @@ function PostListPage() {
                 )}
               </div>
               <div className="col-author">
-                {board?.isAnonymous ? post.anonymousId || '匿名' : `ユーザー${post.userId}`}
+                {board?.isAnonymous ? post.anonymousId || '匿名' : (post.authorNickname || 'Unknown User')}
               </div>
               <div className="col-time">{getTimeAgo(post.createdAt)}</div>
               <div className="col-stats">
