@@ -1,5 +1,6 @@
 package com.ej2.controller;
 
+import com.ej2.dto.PostDTO;
 import com.ej2.model.Post;
 import com.ej2.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +21,14 @@ public class PostController {
 
     // GET /api/posts - Get all posts
     @GetMapping
-    public ResponseEntity<List<Post>> getAllPosts() {
-        List<Post> posts = postService.getAllPosts();
+    public ResponseEntity<List<PostDTO>> getAllPosts() {
+        List<PostDTO> posts = postService.getAllPosts();
         return ResponseEntity.ok(posts);
     }
 
     // GET /api/posts/{id} - Get post by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long id) {
+    public ResponseEntity<PostDTO> getPostById(@PathVariable Long id) {
         return postService.getPostById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -71,8 +72,8 @@ public class PostController {
 
     // GET /api/posts/board/{boardId} - Get posts by board ID
     @GetMapping("/board/{boardId}")
-    public ResponseEntity<List<Post>> getPostsByBoardId(@PathVariable Long boardId) {
-        List<Post> posts = postService.getPostsByBoardId(boardId);
+    public ResponseEntity<List<PostDTO>> getPostsByBoardId(@PathVariable Long boardId) {
+        List<PostDTO> posts = postService.getPostsByBoardId(boardId);
         return ResponseEntity.ok(posts);
     }
 
@@ -136,10 +137,17 @@ public class PostController {
         return ipAddress;
     }
 
-    // POST /api/posts/{id}/like - Increment like count
+    // POST /api/posts/{id}/like - Increment like count with IP tracking
     @PostMapping("/{id}/like")
-    public ResponseEntity<Void> incrementLikeCount(@PathVariable Long id) {
-        postService.incrementLikeCount(id);
+    public ResponseEntity<Void> incrementLikeCount(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long userId,
+            HttpServletRequest request) {
+
+        // Get client IP address
+        String ipAddress = getClientIpAddress(request);
+
+        postService.incrementLikeCount(id, userId, ipAddress);
         return ResponseEntity.ok().build();
     }
 }

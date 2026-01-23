@@ -5,6 +5,7 @@ import MainPage from './pages/Main/MainPage';
 import BoardListPage from './pages/Board/BoardListPage';
 import PostListPage from './pages/Board/PostListPage';
 import PostWritePage from './pages/Board/PostWritePage';
+import PostEditPage from './pages/Board/PostEditPage';
 import PostDetailPage from './pages/Board/PostDetailPage';
 import BoardPage from './pages/Board/BoardPage';
 import TimetablePage from './pages/Timetable/TimetablePage.tsx';
@@ -93,7 +94,9 @@ function NavBar() {
   return (
     <nav className="navbar">
       <div className="nav-container">
-        <h1 className="nav-logo">EJ2</h1>
+        <Link to="/" className="nav-logo-link">
+          <h1 className="nav-logo">EJ2</h1>
+        </Link>
         <ul className="nav-menu">
           <li className="nav-item">
             <Link to="/" className="nav-link">ホーム</Link>
@@ -130,9 +133,6 @@ function NavBar() {
                 ))}
               </ul>
             )}
-          </li>
-          <li className="nav-item">
-            <Link to="/simple-board" className="nav-link">簡単掲示板</Link>
           </li>
           <li className="nav-item">
             <Link to="/timetable" className="nav-link">時間割</Link>
@@ -175,7 +175,7 @@ function App() {
             <Route path="/boards/:boardId/posts" element={<PostListPage />} />
             <Route path="/boards/:boardId/write" element={<PostWritePage />} />
             <Route path="/boards/:boardId/posts/:postId" element={<PostDetailPage />} />
-            <Route path="/simple-board" element={<BoardPage />} />
+            <Route path="/boards/:boardId/posts/:postId/edit" element={<PostEditPage />} />
             <Route path="/timetable" element={<TimetablePage />} />
             <Route path="/users" element={<UsersPage />} />
 

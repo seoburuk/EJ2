@@ -68,7 +68,13 @@ function PostDetailPage() {
 
   const handleLikePost = async () => {
     try {
-      await axios.post(`/api/posts/${postId}/like`);
+      // Get current user if logged in
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const userId = user.id || null;
+
+      // Send user ID as query parameter
+      const params = userId ? { userId } : {};
+      await axios.post(`/api/posts/${postId}/like`, null, { params });
       fetchPost();
     } catch (error) {
       console.error('いいねに失敗しました:', error);
@@ -79,8 +85,40 @@ function PostDetailPage() {
     navigate(`/boards/${boardId}/posts`, { state: { board } });
   };
 
+  const handleEdit = () => {
+    navigate(`/boards/${boardId}/posts/${postId}/edit`, {
+      state: { board, post }
+    });
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('本当にこの投稿を削除しますか？')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`/api/posts/${postId}`);
+      alert('投稿が削除されました');
+      navigate(`/boards/${boardId}/posts`, { state: { board } });
+    } catch (error) {
+      console.error('投稿の削除に失敗しました:', error);
+      alert('投稿の削除に失敗しました');
+    }
+  };
+
+  const canModifyPost = () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return user.id && post && user.id === post.userId;
+  };
+
   const getFormattedDate = (dateString) => {
+    if (!dateString) return '---';
+
     const date = new Date(dateString);
+
+    // Check if date is valid
+    if (isNaN(date.getTime())) return '---';
+
     return date.toLocaleString('ja-JP', {
       year: 'numeric',
       month: '2-digit',
@@ -105,7 +143,19 @@ function PostDetailPage() {
           <button className="back-button" onClick={handleBack}>
             ← 一覧に戻る
           </button>
-          <div className="board-badge">{board?.name || '掲示板'}</div>
+          <div className="header-right">
+            <div className="board-badge">{board?.name || '掲示板'}</div>
+            {canModifyPost() && (
+              <>
+                <button className="edit-button" onClick={handleEdit}>
+                  ✏️ 編集
+                </button>
+                <button className="delete-button" onClick={handleDelete}>
+                  🗑️ 削除
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="post-content-wrapper">
@@ -114,11 +164,12 @@ function PostDetailPage() {
             <div className="post-meta">
               <div className="meta-left">
                 <span className="author">
-                  {board?.isAnonymous ? post.anonymousId || '匿名' : `ユーザー${post.userId}`}
+                  {board?.isAnonymous ? post.anonymousId || '匿名' : (post.authorNickname || 'Unknown User')}
                 </span>
                 <span className="separator">•</span>
                 <span className="date">{getFormattedDate(post.createdAt)}</span>
-                {post.updatedAt !== post.createdAt && (
+                {post.updatedAt && post.createdAt &&
+                 new Date(post.updatedAt).getTime() - new Date(post.createdAt).getTime() > 1000 && (
                   <>
                     <span className="separator">•</span>
                     <span className="edited">(編集済み)</span>

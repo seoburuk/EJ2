@@ -114,10 +114,17 @@ function MainPage() {
   };
 
   const getTimeAgo = (dateString) => {
+    if (!dateString) return '---';
+
     const now = new Date();
     const past = new Date(dateString);
+
+    // Check if date is valid
+    if (isNaN(past.getTime())) return '---';
+
     const diffInMinutes = Math.floor((now - past) / (1000 * 60));
 
+    if (diffInMinutes < 1) return '今';
     if (diffInMinutes < 60) return `${diffInMinutes}分前`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}時間前`;
     return `${Math.floor(diffInMinutes / 1440)}日前`;
@@ -165,14 +172,17 @@ function MainPage() {
                     >
                       <div className="post-item-title">{post.title}</div>
                       <div className="post-item-meta">
-                        <span className="post-item-author">
-                          {board.isAnonymous ? post.anonymousId || '匿名' : `ユーザー${post.userId}`}
-                        </span>
-                        <span className="post-item-time">{getTimeAgo(post.createdAt)}</span>
+                        <div className="post-meta-left">
+                          <span className="post-item-author">
+                            {board.isAnonymous ? (post.anonymousId || '匿名') : (post.authorNickname || 'Unknown User')}
+                          </span>
+                          <span className="post-item-separator">•</span>
+                          <span className="post-item-time">{getTimeAgo(post.createdAt)}</span>
+                        </div>
                         <div className="post-item-stats">
-                          <span>閲覧 {post.viewCount}</span>
-                          <span>추천 {post.likeCount}</span>
-                          <span>댓글 {post.commentCount}</span>
+                          <span>👁 {post.viewCount || 0}</span>
+                          <span>👍 {post.likeCount || 0}</span>
+                          <span>💬 {post.commentCount || 0}</span>
                         </div>
                       </div>
                     </div>
@@ -201,8 +211,11 @@ function MainPage() {
                     <div className="popular-board-name">{post.board?.name}</div>
                     <div className="popular-title-eta">{post.title}</div>
                     <div className="popular-stats-eta">
-                      <span>추천 {post.likeCount}</span>
-                      <span>댓글 {post.commentCount}</span>
+                      👁 {post.viewCount || 0}
+                      <span className="stat-separator"> / </span>
+                      👍 {post.likeCount || 0}
+                      <span className="stat-separator"> / </span>
+                      💬 {post.commentCount || 0}
                     </div>
                   </div>
                 </div>
