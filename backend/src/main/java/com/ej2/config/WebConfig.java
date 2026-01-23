@@ -7,8 +7,10 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
@@ -35,5 +37,27 @@ public class WebConfig implements WebMvcConfigurer {
         converter.setObjectMapper(objectMapper);
 
         converters.add(converter);
+    }
+
+    /**
+     * Configure multipart file upload
+     * Max file size: 10MB
+     * Max request size: 50MB (for multiple files)
+     */
+    @Bean(name = "multipartResolver")
+    public CommonsMultipartResolver multipartResolver() {
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+        multipartResolver.setMaxUploadSize(50 * 1024 * 1024); // 50MB
+        multipartResolver.setMaxUploadSizePerFile(10 * 1024 * 1024); // 10MB per file
+        return multipartResolver;
+    }
+
+    /**
+     * Serve uploaded files as static resources
+     */
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:uploads/");
     }
 }

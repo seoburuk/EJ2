@@ -1,0 +1,247 @@
+.comments-section {
+  margin-top: 40px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e1e4e8;
+  padding: 24px;
+}
+
+.comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e1e4e8;
+}
+
+.comments-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #24292e;
+}
+
+.comments-loading {
+  text-align: center;
+  padding: 40px;
+  color: #6a737d;
+  font-size: 14px;
+}
+
+/* Comment Form */
+.comment-form {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f6f8fa;
+  border-radius: 6px;
+  border: 1px solid #e1e4e8;
+}
+
+.comment-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+
+.comment-form textarea:focus {
+  outline: none;
+  border-color: #0366d6;
+  box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
+}
+
+.submit-comment-btn {
+  padding: 8px 20px;
+  background: #0366d6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submit-comment-btn:hover {
+  background: #0256c4;
+}
+
+/* Comments List */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.no-comments {
+  text-align: center;
+  padding: 40px;
+  color: #6a737d;
+  font-size: 14px;
+  background: #f6f8fa;
+  border-radius: 6px;
+  border: 1px dashed #d1d5da;
+}
+
+/* Comment Item */
+.comment-item {
+  padding: 16px;
+  background: white;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  transition: box-shadow 0.2s;
+}
+
+.comment-item:hover {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.comment-item.reply {
+  margin-left: 40px;
+  margin-top: 12px;
+  background: #f6f8fa;
+  border-left: 3px solid #0366d6;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  font-weight: 600;
+  color: #0366d6;
+  font-size: 14px;
+}
+
+.comment-time {
+  font-size: 12px;
+  color: #6a737d;
+}
+
+.comment-content {
+  color: #24292e;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.comment-action-btn {
+  padding: 6px 12px;
+  background: white;
+  color: #586069;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.comment-action-btn:hover {
+  background: #f6f8fa;
+  border-color: #d1d5da;
+}
+
+.comment-action-btn.delete {
+  color: #d73a49;
+}
+
+.comment-action-btn.delete:hover {
+  background: #ffeef0;
+  border-color: #d73a49;
+}
+
+/* Reply Form */
+.reply-form {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f6f8fa;
+  border-radius: 6px;
+  border: 1px solid #e1e4e8;
+}
+
+.reply-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 8px;
+}
+
+.reply-form textarea:focus {
+  outline: none;
+  border-color: #0366d6;
+  box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
+}
+
+.reply-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.reply-actions button {
+  padding: 6px 16px;
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+  color: #24292e;
+}
+
+.reply-actions button[type="submit"] {
+  background: #0366d6;
+  color: white;
+  border-color: #0366d6;
+}
+
+.reply-actions button:hover {
+  background: #f6f8fa;
+}
+
+.reply-actions button[type="submit"]:hover {
+  background: #0256c4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .comments-section {
+    padding: 16px;
+  }
+
+  .comment-item.reply {
+    margin-left: 20px;
+  }
+
+  .comment-actions {
+    flex-wrap: wrap;
+  }
+
+  .comment-action-btn {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+}

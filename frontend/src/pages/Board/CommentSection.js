@@ -1,0 +1,241 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './CommentSection.css';
+
+function CommentSection({ postId, boardId, isAnonymous }) {
+  const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [newComment, setNewComment] = useState('');
+  const [replyTo, setReplyTo] = useState(null);
+  const [replyContent, setReplyContent] = useState('');
+
+  useEffect(() => {
+    fetchComments();
+  }, [postId]);
+
+  const fetchComments = async () => {
+    try {
+      const response = await axios.get(`/api/comments/post/${postId}`);
+      setComments(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('コメントの読み込みに失敗しました:', error);
+      setComments([]);
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitComment = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    // Get current user
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.id) {
+      alert('ログインが必要です');
+      return;
+    }
+
+    try {
+      const commentData = {
+        postId: parseInt(postId),
+        userId: user.id,
+        content: newComment,
+        anonymousId: isAnonymous ? `匿名${Math.floor(Math.random() * 1000)}` : null
+      };
+
+      await axios.post('/api/comments', commentData);
+      setNewComment('');
+      fetchComments();
+    } catch (error) {
+      console.error('コメントの作成に失敗しました:', error);
+      alert('コメントの作成に失敗しました。');
+    }
+  };
+
+  const handleSubmitReply = async (e, parentId) => {
+    e.preventDefault();
+    if (!replyContent.trim()) return;
+
+    // Get current user
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.id) {
+      alert('ログインが必要です');
+      return;
+    }
+
+    try {
+      const replyData = {
+        postId: parseInt(postId),
+        userId: user.id,
+        parentId: parentId,
+        content: replyContent,
+        anonymousId: isAnonymous ? `匿名${Math.floor(Math.random() * 1000)}` : null
+      };
+
+      await axios.post('/api/comments', replyData);
+      setReplyContent('');
+      setReplyTo(null);
+      fetchComments();
+    } catch (error) {
+      console.error('返信の作成に失敗しました:', error);
+      alert('返信の作成に失敗しました。');
+    }
+  };
+
+  const handleLikeComment = async (commentId) => {
+    try {
+      await axios.post(`/api/comments/${commentId}/like`);
+      fetchComments();
+    } catch (error) {
+      console.error('いいねに失敗しました:', error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('コメントを削除しますか？')) return;
+
+    try {
+      await axios.delete(`/api/comments/${commentId}`);
+      fetchComments();
+    } catch (error) {
+      console.error('コメントの削除に失敗しました:', error);
+      alert('コメントの削除に失敗しました。');
+    }
+  };
+
+  const getTimeAgo = (dateString) => {
+    const now = new Date();
+    const past = new Date(dateString);
+    const diffInMinutes = Math.floor((now - past) / (1000 * 60));
+
+    if (diffInMinutes < 1) return 'たった今';
+    if (diffInMinutes < 60) return `${diffInMinutes}分前`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}時間前`;
+    if (diffInMinutes < 10080) return `${Math.floor(diffInMinutes / 1440)}日前`;
+    return past.toLocaleDateString('ja-JP');
+  };
+
+  const topLevelComments = comments.filter(c => !c.parentId);
+  const getReplies = (parentId) => comments.filter(c => c.parentId === parentId);
+
+  if (loading) {
+    return <div className="comments-loading">コメントを読み込み中...</div>;
+  }
+
+  return (
+    <div className="comments-section">
+      <div className="comments-header">
+        <h3>コメント {comments.length}</h3>
+      </div>
+
+      <form className="comment-form" onSubmit={handleSubmitComment}>
+        <textarea
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="コメントを入力してください..."
+          rows="3"
+        />
+        <button type="submit" className="submit-comment-btn">
+          コメントを投稿
+        </button>
+      </form>
+
+      <div className="comments-list">
+        {topLevelComments.length === 0 ? (
+          <div className="no-comments">
+            最初のコメントを書いてみましょう！
+          </div>
+        ) : (
+          topLevelComments.map(comment => (
+            <div key={comment.id} className="comment-item">
+              <div className="comment-header">
+                <span className="comment-author">
+                  {isAnonymous ? comment.anonymousId || '匿名' : `ユーザー${comment.userId}`}
+                </span>
+                <span className="comment-time">{getTimeAgo(comment.createdAt)}</span>
+              </div>
+
+              <div className="comment-content">
+                {comment.content}
+              </div>
+
+              <div className="comment-actions">
+                <button
+                  className="comment-action-btn"
+                  onClick={() => handleLikeComment(comment.id)}
+                >
+                  👍 {comment.likeCount || 0}
+                </button>
+                <button
+                  className="comment-action-btn"
+                  onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
+                >
+                  💬 返信
+                </button>
+                <button
+                  className="comment-action-btn delete"
+                  onClick={() => handleDeleteComment(comment.id)}
+                >
+                  🗑️ 削除
+                </button>
+              </div>
+
+              {replyTo === comment.id && (
+                <form
+                  className="reply-form"
+                  onSubmit={(e) => handleSubmitReply(e, comment.id)}
+                >
+                  <textarea
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    placeholder="返信を入力してください..."
+                    rows="2"
+                  />
+                  <div className="reply-actions">
+                    <button type="button" onClick={() => setReplyTo(null)}>
+                      キャンセル
+                    </button>
+                    <button type="submit">返信を投稿</button>
+                  </div>
+                </form>
+              )}
+
+              {getReplies(comment.id).map(reply => (
+                <div key={reply.id} className="comment-item reply">
+                  <div className="comment-header">
+                    <span className="comment-author">
+                      {isAnonymous ? reply.anonymousId || '匿名' : `ユーザー${reply.userId}`}
+                    </span>
+                    <span className="comment-time">{getTimeAgo(reply.createdAt)}</span>
+                  </div>
+
+                  <div className="comment-content">
+                    {reply.content}
+                  </div>
+
+                  <div className="comment-actions">
+                    <button
+                      className="comment-action-btn"
+                      onClick={() => handleLikeComment(reply.id)}
+                    >
+                      👍 {reply.likeCount || 0}
+                    </button>
+                    <button
+                      className="comment-action-btn delete"
+                      onClick={() => handleDeleteComment(reply.id)}
+                    >
+                      🗑️ 削除
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default CommentSection;
