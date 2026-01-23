@@ -1,0 +1,139 @@
+.board-list-page {
+  min-height: calc(100vh - 60px);
+  background: linear-gradient(135deg, #e8eaf6 0%, #f5f7fa 100%);
+  padding: 40px 20px;
+}
+
+.board-list-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.board-list-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.board-list-header h1 {
+  font-size: 36px;
+  color: #3949ab;
+  margin: 0 0 12px 0;
+  font-weight: 700;
+}
+
+.board-list-subtitle {
+  font-size: 16px;
+  color: #757575;
+  margin: 0;
+}
+
+.boards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.board-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(92, 107, 192, 0.1);
+  border: 2px solid transparent;
+}
+
+.board-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(92, 107, 192, 0.2);
+  border-color: #5c6bc0;
+}
+
+.board-icon {
+  font-size: 48px;
+  min-width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+  border-radius: 12px;
+}
+
+.board-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.board-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #212121;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.anonymous-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #7986cb 0%, #5c6bc0 100%);
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.board-description {
+  font-size: 14px;
+  color: #757575;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.board-arrow {
+  font-size: 24px;
+  color: #5c6bc0;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+}
+
+.board-card:hover .board-arrow {
+  transform: translateX(4px);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 18px;
+  color: #5c6bc0;
+}
+
+@media (max-width: 768px) {
+  .board-list-page {
+    padding: 20px 10px;
+  }
+
+  .board-list-header h1 {
+    font-size: 28px;
+  }
+
+  .boards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .board-icon {
+    font-size: 36px;
+    min-width: 52px;
+    height: 52px;
+  }
+
+  .board-name {
+    font-size: 18px;
+  }
+}

@@ -1,31 +1,188 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import MainPage from './pages/Main/MainPage';
+import BoardListPage from './pages/Board/BoardListPage';
+import PostListPage from './pages/Board/PostListPage';
+import PostWritePage from './pages/Board/PostWritePage';
+import PostDetailPage from './pages/Board/PostDetailPage';
+import BoardPage from './pages/Board/BoardPage';
 import TimetablePage from './pages/Timetable/TimetablePage.tsx';
 import UsersPage from './pages/Users/UsersPage';
+import LoginPage from './pages/Auth/LoginPage';
+import RegisterPage from './pages/Auth/RegisterPage';
+import PasswordResetPage from './pages/Auth/PasswordResetPage';
 import './App.css';
+
+function NavBar() {
+  const [boards, setBoards] = useState([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchBoards();
+    checkUserLogin();
+  }, []);
+
+  // ユーザーのログイン状態を確認
+  const checkUserLogin = () => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  };
+
+  // ログアウト処理
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    navigate('/login');
+  };
+
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
+  const fetchBoards = async () => {
+    try {
+      const response = await axios.get('/api/boards');
+      setBoards(response.data);
+    } catch (error) {
+      console.error('掲示板の読み込みに失敗しました:', error);
+      const mockBoards = [
+        { id: 1, code: 'GENERAL', name: '自由掲示板', description: '自由に話題を共有する掲示板です', isAnonymous: false },
+        { id: 2, code: 'ANONYMOUS', name: '匿名掲示板', description: '匿名で自由に意見を交換できます', isAnonymous: true },
+        { id: 3, code: 'EVENT', name: 'イベント掲示板', description: '大学のイベント情報を共有します', isAnonymous: false },
+        { id: 4, code: 'MARKET', name: '中古市場', description: '中古品を売買する掲示板です', isAnonymous: false },
+        { id: 5, code: 'BEST', name: 'ベスト掲示板', description: '人気投稿が集まる掲示板です', isAnonymous: false },
+      ];
+      setBoards(mockBoards);
+    }
+  };
+
+  const getBoardIcon = (code) => {
+    const icons = {
+      'GENERAL': '💬',
+      'ANONYMOUS': '👤',
+      'EVENT': '📅',
+      'MARKET': '🛒',
+      'BEST': '⭐'
+    };
+    return icons[code] || '📋';
+  };
+
+  const handleBoardSelect = (board) => {
+    navigate(`/boards/${board.id}/posts`, { state: { board } });
+    setIsDropdownOpen(false);
+  };
+
+  return (
+    <nav className="navbar">
+      <div className="nav-container">
+        <h1 className="nav-logo">EJ2</h1>
+        <ul className="nav-menu">
+          <li className="nav-item">
+            <Link to="/" className="nav-link">ホーム</Link>
+          </li>
+          <li className="nav-item nav-dropdown" ref={dropdownRef}>
+            <button
+              className="nav-link nav-dropdown-toggle"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              掲示板 <span className="dropdown-arrow">{isDropdownOpen ? '▲' : '▼'}</span>
+            </button>
+            {isDropdownOpen && (
+              <ul className="nav-dropdown-menu">
+                <li>
+                  <Link
+                    to="/boards"
+                    className="nav-dropdown-item"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    📋 すべての掲示板
+                  </Link>
+                </li>
+                <li className="nav-dropdown-divider"></li>
+                {boards.map(board => (
+                  <li key={board.id}>
+                    <button
+                      className="nav-dropdown-item"
+                      onClick={() => handleBoardSelect(board)}
+                    >
+                      {getBoardIcon(board.code)} {board.name}
+                      {board.isAnonymous && <span className="anonymous-badge-small">匿名</span>}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+          <li className="nav-item">
+            <Link to="/simple-board" className="nav-link">簡単掲示板</Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/timetable" className="nav-link">時間割</Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/users" className="nav-link">ユーザー</Link>
+          </li>
+
+          {/* 認証ボタン */}
+          <li className="nav-item nav-auth">
+            {user ? (
+              <div className="nav-user-info">
+                <span className="nav-username">👤 {user.name}</span>
+                <button onClick={handleLogout} className="nav-link nav-logout">
+                  ログアウト
+                </button>
+              </div>
+            ) : (
+              <Link to="/login" className="nav-link nav-login">
+                ログイン
+              </Link>
+            )}
+          </li>
+        </ul>
+      </div>
+    </nav>
+  );
+}
 
 function App() {
   return (
     <Router>
       <div className="App">
-        <nav className="navbar">
-          <div className="nav-container">
-            <h1 className="nav-logo">EJ2</h1>
-            <ul className="nav-menu">
-              <li className="nav-item">
-                <Link to="/" className="nav-link">시간표</Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/users" className="nav-link">사용자</Link>
-              </li>
-            </ul>
-          </div>
-        </nav>
+        <NavBar />
 
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<TimetablePage />} />
+            <Route path="/" element={<MainPage />} />
+            <Route path="/boards" element={<BoardListPage />} />
+            <Route path="/boards/:boardId/posts" element={<PostListPage />} />
+            <Route path="/boards/:boardId/write" element={<PostWritePage />} />
+            <Route path="/boards/:boardId/posts/:postId" element={<PostDetailPage />} />
+            <Route path="/simple-board" element={<BoardPage />} />
+            <Route path="/timetable" element={<TimetablePage />} />
             <Route path="/users" element={<UsersPage />} />
+
+            {/* 認証ページ */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/password-reset" element={<PasswordResetPage />} />
           </Routes>
         </main>
       </div>
