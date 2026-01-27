@@ -106,4 +106,29 @@ public class TimetableService {
     public List<Timetable> getUserTimetables(Long userId) {
         return timetableRepository.findByUserId(userId);
     }
+
+    /**
+     * 時間割の所有者かどうか確認
+     * @param timetableId 時間割ID
+     * @param userId ユーザーID
+     * @return 所有者であればtrue
+     */
+    public boolean isOwner(Long timetableId, Long userId) {
+        Timetable timetable = timetableRepository.findById(timetableId);
+        return timetable != null && timetable.getUserId().equals(userId);
+    }
+
+    /**
+     * 科目の所有者かどうか確認（科目が属する時間割の所有者）
+     * @param courseId 科目ID
+     * @param userId ユーザーID
+     * @return 所有者であればtrue
+     */
+    public boolean isCourseOwner(Long courseId, Long userId) {
+        TimetableCourse course = courseRepository.findById(courseId);
+        if (course == null || course.getTimetable() == null) {
+            return false;
+        }
+        return course.getTimetable().getUserId().equals(userId);
+    }
 }

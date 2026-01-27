@@ -1,37 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { TimetableCourse, Timetable, DAYS, PERIODS } from '../../types/timetable.ts';
 import CourseModal from './CourseModal.tsx';
 import './TimetablePage.css';
+
+interface User {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+}
 
 const TimetablePage: React.FC = () => {
   const [timetable, setTimetable] = useState<Timetable | null>(null);
   const [courses, setCourses] = useState<TimetableCourse[]>([]);
   const [selectedSemester, setSelectedSemester] = useState('spring');
   const [selectedYear, setSelectedYear] = useState(2026);
-  const [selectedUserId, setSelectedUserId] = useState(1);
-  const [users, setUsers] = useState<any[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<{day: number, period: number} | null>(null);
   const [editingCourse, setEditingCourse] = useState<TimetableCourse | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    loadUsers();
+    checkLogin();
   }, []);
 
   useEffect(() => {
-    loadTimetable();
-  }, [selectedSemester, selectedYear, selectedUserId]);
+    if (currentUser) {
+      loadTimetable();
+    }
+  }, [selectedSemester, selectedYear, currentUser]);
 
-  const loadUsers = async () => {
-    try {
-      const response = await axios.get('/api/users');
-      setUsers(response.data);
-      if (response.data.length > 0) {
-        setSelectedUserId(response.data[0].id);
-      }
-    } catch (error) {
-      console.error('사용자 목록 로딩 실패', error);
+  const checkLogin = () => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setCurrentUser(JSON.parse(storedUser));
+    } else {
+      // 미로그인 시 로그인 페이지로 리다이렉트
+      navigate('/login', { state: { from: '/timetable', message: '시간표를 보려면 로그인이 필요합니다.' } });
     }
   };
 
@@ -40,15 +48,20 @@ const TimetablePage: React.FC = () => {
       const response = await axios.get('/api/timetable', {
         params: {
           semester: selectedSemester,
-          year: selectedYear,
-          userId: selectedUserId
-        }
+          year: selectedYear
+        },
+        withCredentials: true  // セッションCookieを送信
       });
       console.log('📥 백엔드에서 받은 courses:', response.data.courses);
       setTimetable(response.data.timetable);
       setCourses(response.data.courses);
-    } catch (error) {
+    } catch (error: any) {
       console.error('시간표 로딩 실패', error);
+      if (error.response?.status === 401) {
+        // 세션 만료 시 로그인 페이지로 이동
+        localStorage.removeItem('user');
+        navigate('/login', { state: { from: '/timetable', message: '세션이 만료되었습니다. 다시 로그인해주세요.' } });
+      }
     }
   };
 
@@ -105,26 +118,38 @@ const TimetablePage: React.FC = () => {
       console.log('📅 daySchedules値:', dataToSend.daySchedules);
 
       if (course.courseId) {
-        await axios.put(`/api/timetable/course/${course.courseId}`, dataToSend);
+        await axios.put(`/api/timetable/course/${course.courseId}`, dataToSend, { withCredentials: true });
       } else {
-        await axios.post('/api/timetable/course', dataToSend);
+        await axios.post('/api/timetable/course', dataToSend, { withCredentials: true });
       }
       loadTimetable();
       closeModal();
     } catch (error: any) {
       console.error('❌ エラー:', error.response?.data);
-      alert(error.response?.data || '저장 실패');
+      const status = error.response?.status;
+      if (status === 401) {
+        localStorage.removeItem('user');
+        navigate('/login', { state: { from: '/timetable', message: 'セッションが切れました。再ログインしてください。' } });
+      } else if (status === 403) {
+        alert('この操作を行う権限がありません。');
+      } else {
+        alert(error.response?.data || '保存に失敗しました');
+      }
     }
   };
 
   const handleDeleteCourse = async (courseId: number) => {
     if (window.confirm('이 과목을 삭제하시겠습니까?')) {
       try {
-        await axios.delete(`/api/timetable/course/${courseId}`);
+        await axios.delete(`/api/timetable/course/${courseId}`, { withCredentials: true });
         loadTimetable();
         closeModal();
-      } catch (error) {
-        alert('삭제 실패');
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          alert('이 과목을 삭제할 권한이 없습니다.');
+        } else {
+          alert('삭제 실패');
+        }
       }
     }
   };
@@ -158,6 +183,11 @@ const TimetablePage: React.FC = () => {
     return sum + (course.credits || 0);
   }, 0);
 
+  // 미로그인 시 아무것도 렌더링하지 않음 (리다이렉트 처리됨)
+  if (!currentUser) {
+    return null;
+  }
+
   return (
     <div className="timetable-container">
       <div className="credits-summary">
@@ -169,21 +199,11 @@ const TimetablePage: React.FC = () => {
       </div>
 
       <div className="semester-selector">
-        <select
-          value={selectedUserId}
-          onChange={(e) => setSelectedUserId(Number(e.target.value))}
-          className="user-selector"
-        >
-          {users.length === 0 ? (
-            <option value={1}>사용자를 추가해주세요</option>
-          ) : (
-            users.map(user => (
-              <option key={user.id} value={user.id}>
-                {user.name} ({user.email})
-              </option>
-            ))
-          )}
-        </select>
+        {currentUser && (
+          <span className="current-user-label">
+            👤 {currentUser.name}
+          </span>
+        )}
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(Number(e.target.value))}

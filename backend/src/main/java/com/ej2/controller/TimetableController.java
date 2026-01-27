@@ -7,13 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/timetable")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class TimetableController {
 
     @Autowired
@@ -50,12 +51,28 @@ public class TimetableController {
         return null;
     }
 
+    /**
+     * セッションからログイン中のユーザーIDを取得
+     * @param session HTTPセッション
+     * @return ユーザーID（未ログインの場合はnull）
+     */
+    private Long getLoggedInUserId(HttpSession session) {
+        Object userId = session.getAttribute("userId");
+        return userId != null ? (Long) userId : null;
+    }
+
     // 시간표와 과목 목록 조회
     @GetMapping
     public ResponseEntity<?> getTimetable(
-            @RequestParam(required = false, defaultValue = "1") Long userId,
             @RequestParam Integer year,
-            @RequestParam String semester) {
+            @RequestParam String semester,
+            HttpSession session) {
+
+        // ログインチェック
+        Long userId = getLoggedInUserId(session);
+        if (userId == null) {
+            return ResponseEntity.status(401).body("ログインが必要です");
+        }
 
         try {
             Map<String, Object> result = timetableService.getTimetableWithCourses(userId, year, semester);
@@ -67,7 +84,13 @@ public class TimetableController {
 
     // 과목 추가
     @PostMapping("/course")
-    public ResponseEntity<?> addCourse(@RequestBody Map<String, Object> requestData) {
+    public ResponseEntity<?> addCourse(@RequestBody Map<String, Object> requestData, HttpSession session) {
+        // ログインチェック
+        Long userId = getLoggedInUserId(session);
+        if (userId == null) {
+            return ResponseEntity.status(401).body("ログインが必要です");
+        }
+
         try {
             // デバッグ: 受信データを確認
             System.out.println("📥 受信したデータ: " + requestData);
@@ -77,11 +100,16 @@ public class TimetableController {
             if (requestData.get("timetableId") == null) {
                 return ResponseEntity.badRequest().body("시간표 ID가 필요합니다");
             }
+
+            Long timetableId = Long.valueOf(requestData.get("timetableId").toString());
+
+            // 権限チェック: 時間割の所有者かどうか確認
+            if (!timetableService.isOwner(timetableId, userId)) {
+                return ResponseEntity.status(403).body("この時間割を編集する権限がありません");
+            }
             if (requestData.get("courseName") == null) {
                 return ResponseEntity.badRequest().body("과목명이 필요합니다");
             }
-
-            Long timetableId = Long.valueOf(requestData.get("timetableId").toString());
 
             TimetableCourse course = new TimetableCourse();
             course.setCourseName((String) requestData.get("courseName"));
@@ -166,9 +194,21 @@ public class TimetableController {
     @PutMapping("/course/{courseId}")
     public ResponseEntity<?> updateCourse(
             @PathVariable Long courseId,
-            @RequestBody Map<String, Object> requestData) {
+            @RequestBody Map<String, Object> requestData,
+            HttpSession session) {
+
+        // ログインチェック
+        Long userId = getLoggedInUserId(session);
+        if (userId == null) {
+            return ResponseEntity.status(401).body("ログインが必要です");
+        }
 
         try {
+            // 権限チェック: 科目の所有者かどうか確認
+            if (!timetableService.isCourseOwner(courseId, userId)) {
+                return ResponseEntity.status(403).body("この科目を編集する権限がありません");
+            }
+
             // Null 체크
             if (requestData.get("courseName") == null) {
                 return ResponseEntity.badRequest().body("과목명이 필요합니다");
@@ -255,8 +295,19 @@ public class TimetableController {
 
     // 과목 삭제
     @DeleteMapping("/course/{courseId}")
-    public ResponseEntity<?> deleteCourse(@PathVariable Long courseId) {
+    public ResponseEntity<?> deleteCourse(@PathVariable Long courseId, HttpSession session) {
+        // ログインチェック
+        Long userId = getLoggedInUserId(session);
+        if (userId == null) {
+            return ResponseEntity.status(401).body("ログインが必要です");
+        }
+
         try {
+            // 権限チェック: 科目の所有者かどうか確認
+            if (!timetableService.isCourseOwner(courseId, userId)) {
+                return ResponseEntity.status(403).body("この科目を削除する権限がありません");
+            }
+
             timetableService.deleteCourse(courseId);
             return ResponseEntity.ok("삭제 완료");
         } catch (Exception e) {
