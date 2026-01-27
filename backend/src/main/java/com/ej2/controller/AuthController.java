@@ -6,12 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
+
 /**
  * 認証コントローラー - ログイン、会員登録、パスワードリセットのエンドポイント
  */
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class AuthController {
 
     @Autowired
@@ -21,16 +23,48 @@ public class AuthController {
      * ログインエンドポイント
      * POST /api/auth/login
      * @param request ログインリクエスト（username, password）
+     * @param session HTTPセッション
      * @return 認証レスポンス
      */
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request, HttpSession session) {
         AuthResponse response = authService.login(request);
 
         if (response.isSuccess()) {
+            // セッションにユーザーIDを保存
+            session.setAttribute("userId", response.getUser().getId());
+            session.setAttribute("user", response.getUser());
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(401).body(response);
+        }
+    }
+
+    /**
+     * ログアウトエンドポイント
+     * POST /api/auth/logout
+     * @param session HTTPセッション
+     * @return 認証レスポンス
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<AuthResponse> logout(HttpSession session) {
+        session.invalidate();
+        return ResponseEntity.ok(new AuthResponse(true, "ログアウトしました"));
+    }
+
+    /**
+     * 現在のログインユーザー情報を取得
+     * GET /api/auth/me
+     * @param session HTTPセッション
+     * @return 認証レスポンス
+     */
+    @GetMapping("/me")
+    public ResponseEntity<AuthResponse> getCurrentUser(HttpSession session) {
+        Object user = session.getAttribute("user");
+        if (user != null) {
+            return ResponseEntity.ok(new AuthResponse(true, "ログイン中", (com.ej2.model.User) user));
+        } else {
+            return ResponseEntity.status(401).body(new AuthResponse(false, "ログインしていません"));
         }
     }
 

@@ -35,7 +35,7 @@ function LoginPage() {
       const response = await axios.post('/api/auth/login', {
         username: formData.username,
         password: formData.password
-      });
+      }, { withCredentials: true });
 
       if (response.data.success) {
         // ログイン成功: ユーザー情報をlocalStorageに保存

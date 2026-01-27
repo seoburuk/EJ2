@@ -39,7 +39,7 @@ public class AuthService {
         // 2. ユーザーが存在しない場合
         if (user == null) {
             // タイミング攻撃防止: 実際のパスワード検証と同じ時間がかかるように
-            PasswordUtil.verifyPassword("dummy", "$2a$12$dummyhashfordemo");
+            PasswordUtil.verifyPassword("dummy", "$2a$12$000000000000000000000uGTACuPSTOQRhMqaViHUXn4eOJyGkm");
             return new AuthResponse(false, "ユーザー名またはパスワードが正しくありません");
         }
 
