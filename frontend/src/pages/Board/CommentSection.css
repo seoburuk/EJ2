@@ -169,6 +169,69 @@
   border-color: #d73a49;
 }
 
+.comment-action-btn.edit {
+  color: #0366d6;
+}
+
+.comment-action-btn.edit:hover {
+  background: #f1f8ff;
+  border-color: #0366d6;
+}
+
+/* Comment Edit Form */
+.comment-edit-form {
+  margin-bottom: 12px;
+}
+
+.comment-edit-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #0366d6;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 8px;
+  background: #f1f8ff;
+}
+
+.comment-edit-form textarea:focus {
+  outline: none;
+  border-color: #0366d6;
+  box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.2);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.edit-actions button {
+  padding: 6px 16px;
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+  color: #24292e;
+}
+
+.edit-actions button:last-child {
+  background: #0366d6;
+  color: white;
+  border-color: #0366d6;
+}
+
+.edit-actions button:hover {
+  background: #f6f8fa;
+}
+
+.edit-actions button:last-child:hover {
+  background: #0256c4;
+}
+
 /* Reply Form */
 .reply-form {
   margin-top: 12px;

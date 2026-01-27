@@ -43,6 +43,11 @@ public class CommentService {
         return commentRepository.findById(id);
     }
 
+    // コメントエンティティを直接取得（権限検証用）
+    public Comment getCommentEntityById(Long id) {
+        return commentRepository.findById(id).orElse(null);
+    }
+
     public Comment createComment(Comment comment) {
         // Check if this post is in an anonymous board
         Optional<Post> postOpt = postRepository.findById(comment.getPostId());
@@ -71,11 +76,12 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
+    // コメントを削除（ソフトデリート）
     public void deleteComment(Long id) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Comment not found with id: " + id));
         comment.setIsDeleted(true);
-        comment.setContent("삭제된 댓글입니다.");
+        comment.setContent("削除されたコメントです。");
         commentRepository.save(comment);
     }
 

@@ -96,13 +96,23 @@ function PostDetailPage() {
       return;
     }
 
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.id) {
+      alert('ログインが必要です');
+      return;
+    }
+
     try {
-      await axios.delete(`/api/posts/${postId}`);
+      await axios.delete(`/api/posts/${postId}?userId=${user.id}`);
       alert('投稿が削除されました');
       navigate(`/boards/${boardId}/posts`, { state: { board } });
     } catch (error) {
       console.error('投稿の削除に失敗しました:', error);
-      alert('投稿の削除に失敗しました');
+      if (error.response && error.response.status === 403) {
+        alert('自分の投稿のみ削除できます。');
+      } else {
+        alert('投稿の削除に失敗しました');
+      }
     }
   };
 
