@@ -53,10 +53,22 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdComment);
     }
 
-    // PUT /api/comments/{id} - Update comment
+    // PUT /api/comments/{id} - コメントを更新（本人のみ編集可能）
     @PutMapping("/{id}")
-    public ResponseEntity<Comment> updateComment(@PathVariable Long id, @RequestBody Comment commentDetails) {
+    public ResponseEntity<Comment> updateComment(
+            @PathVariable Long id,
+            @RequestBody Comment commentDetails,
+            @RequestParam Long userId) {
         try {
+            // 権限検証：本人のコメントかどうか確認
+            Comment existingComment = commentService.getCommentEntityById(id);
+            if (existingComment == null) {
+                return ResponseEntity.notFound().build();
+            }
+            if (!existingComment.getUserId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
             Comment updatedComment = commentService.updateComment(id, commentDetails);
             return ResponseEntity.ok(updatedComment);
         } catch (RuntimeException e) {
@@ -64,10 +76,21 @@ public class CommentController {
         }
     }
 
-    // DELETE /api/comments/{id} - Soft delete comment
+    // DELETE /api/comments/{id} - コメントを削除（本人のみ削除可能）
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteComment(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long id,
+            @RequestParam Long userId) {
         try {
+            // 権限検証：本人のコメントかどうか確認
+            Comment existingComment = commentService.getCommentEntityById(id);
+            if (existingComment == null) {
+                return ResponseEntity.notFound().build();
+            }
+            if (!existingComment.getUserId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
             commentService.deleteComment(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {

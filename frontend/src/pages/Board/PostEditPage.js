@@ -92,7 +92,7 @@ function PostEditPage() {
         content: formData.content.trim()
       };
 
-      await axios.put(`/api/posts/${postId}`, updateData);
+      await axios.put(`/api/posts/${postId}?userId=${user.id}`, updateData);
 
       // Success - redirect to post detail
       navigate(`/boards/${boardId}/posts/${postId}`, {
@@ -100,12 +100,17 @@ function PostEditPage() {
       });
     } catch (err) {
       console.error('投稿の更新に失敗しました:', err);
-      const errorMessage = err.response?.data?.message ||
-                          err.response?.data?.error ||
-                          err.message ||
-                          '投稿の更新に失敗しました。もう一度お試しください。';
-      setError(errorMessage);
-      alert('エラー: ' + errorMessage);
+      if (err.response && err.response.status === 403) {
+        setError('自分の投稿のみ編集できます。');
+        alert('自分の投稿のみ編集できます。');
+      } else {
+        const errorMessage = err.response?.data?.message ||
+                            err.response?.data?.error ||
+                            err.message ||
+                            '投稿の更新に失敗しました。もう一度お試しください。';
+        setError(errorMessage);
+        alert('エラー: ' + errorMessage);
+      }
     } finally {
       setLoading(false);
     }

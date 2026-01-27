@@ -8,6 +8,11 @@ function CommentSection({ postId, boardId, isAnonymous }) {
   const [newComment, setNewComment] = useState('');
   const [replyTo, setReplyTo] = useState(null);
   const [replyContent, setReplyContent] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editContent, setEditContent] = useState('');
+
+  // 現在のユーザー情報を取得
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
     fetchComments();
@@ -95,13 +100,65 @@ function CommentSection({ postId, boardId, isAnonymous }) {
   const handleDeleteComment = async (commentId) => {
     if (!window.confirm('コメントを削除しますか？')) return;
 
+    if (!user.id) {
+      alert('ログインが必要です');
+      return;
+    }
+
     try {
-      await axios.delete(`/api/comments/${commentId}`);
+      await axios.delete(`/api/comments/${commentId}?userId=${user.id}`);
       fetchComments();
     } catch (error) {
       console.error('コメントの削除に失敗しました:', error);
-      alert('コメントの削除に失敗しました。');
+      if (error.response && error.response.status === 403) {
+        alert('自分のコメントのみ削除できます。');
+      } else {
+        alert('コメントの削除に失敗しました。');
+      }
     }
+  };
+
+  // コメント編集開始
+  const handleStartEdit = (comment) => {
+    setEditingId(comment.id);
+    setEditContent(comment.content);
+  };
+
+  // コメント編集キャンセル
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditContent('');
+  };
+
+  // コメント更新を保存
+  const handleSaveEdit = async (commentId) => {
+    if (!editContent.trim()) return;
+
+    if (!user.id) {
+      alert('ログインが必要です');
+      return;
+    }
+
+    try {
+      await axios.put(`/api/comments/${commentId}?userId=${user.id}`, {
+        content: editContent
+      });
+      setEditingId(null);
+      setEditContent('');
+      fetchComments();
+    } catch (error) {
+      console.error('コメントの更新に失敗しました:', error);
+      if (error.response && error.response.status === 403) {
+        alert('自分のコメントのみ編集できます。');
+      } else {
+        alert('コメントの更新に失敗しました。');
+      }
+    }
+  };
+
+  // 本人のコメントかどうかを確認
+  const isOwnComment = (comment) => {
+    return user.id && comment.userId === user.id;
   };
 
   const getTimeAgo = (dateString) => {
@@ -156,9 +213,23 @@ function CommentSection({ postId, boardId, isAnonymous }) {
                 <span className="comment-time">{getTimeAgo(comment.createdAt)}</span>
               </div>
 
-              <div className="comment-content">
-                {comment.content}
-              </div>
+              {editingId === comment.id ? (
+                <div className="comment-edit-form">
+                  <textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    rows="3"
+                  />
+                  <div className="edit-actions">
+                    <button onClick={handleCancelEdit}>キャンセル</button>
+                    <button onClick={() => handleSaveEdit(comment.id)}>保存</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="comment-content">
+                  {comment.content}
+                </div>
+              )}
 
               <div className="comment-actions">
                 <button
@@ -173,12 +244,22 @@ function CommentSection({ postId, boardId, isAnonymous }) {
                 >
                   💬 返信
                 </button>
-                <button
-                  className="comment-action-btn delete"
-                  onClick={() => handleDeleteComment(comment.id)}
-                >
-                  🗑️ 削除
-                </button>
+                {isOwnComment(comment) && !comment.isDeleted && (
+                  <>
+                    <button
+                      className="comment-action-btn edit"
+                      onClick={() => handleStartEdit(comment)}
+                    >
+                      ✏️ 編集
+                    </button>
+                    <button
+                      className="comment-action-btn delete"
+                      onClick={() => handleDeleteComment(comment.id)}
+                    >
+                      🗑️ 削除
+                    </button>
+                  </>
+                )}
               </div>
 
               {replyTo === comment.id && (
@@ -210,9 +291,23 @@ function CommentSection({ postId, boardId, isAnonymous }) {
                     <span className="comment-time">{getTimeAgo(reply.createdAt)}</span>
                   </div>
 
-                  <div className="comment-content">
-                    {reply.content}
-                  </div>
+                  {editingId === reply.id ? (
+                    <div className="comment-edit-form">
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        rows="2"
+                      />
+                      <div className="edit-actions">
+                        <button onClick={handleCancelEdit}>キャンセル</button>
+                        <button onClick={() => handleSaveEdit(reply.id)}>保存</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="comment-content">
+                      {reply.content}
+                    </div>
+                  )}
 
                   <div className="comment-actions">
                     <button
@@ -221,12 +316,22 @@ function CommentSection({ postId, boardId, isAnonymous }) {
                     >
                       👍 {reply.likeCount || 0}
                     </button>
-                    <button
-                      className="comment-action-btn delete"
-                      onClick={() => handleDeleteComment(reply.id)}
-                    >
-                      🗑️ 削除
-                    </button>
+                    {isOwnComment(reply) && !reply.isDeleted && (
+                      <>
+                        <button
+                          className="comment-action-btn edit"
+                          onClick={() => handleStartEdit(reply)}
+                        >
+                          ✏️ 編集
+                        </button>
+                        <button
+                          className="comment-action-btn delete"
+                          onClick={() => handleDeleteComment(reply.id)}
+                        >
+                          🗑️ 削除
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}

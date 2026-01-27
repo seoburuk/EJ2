@@ -41,10 +41,22 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPost);
     }
 
-    // PUT /api/posts/{id} - Update post
+    // PUT /api/posts/{id} - 投稿を更新（本人のみ編集可能）
     @PutMapping("/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post postDetails) {
+    public ResponseEntity<Post> updatePost(
+            @PathVariable Long id,
+            @RequestBody Post postDetails,
+            @RequestParam Long userId) {
         try {
+            // 権限検証：本人の投稿かどうか確認
+            Post existingPost = postService.getPostEntityById(id);
+            if (existingPost == null) {
+                return ResponseEntity.notFound().build();
+            }
+            if (!existingPost.getUserId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
             Post updatedPost = postService.updatePost(id, postDetails);
             return ResponseEntity.ok(updatedPost);
         } catch (RuntimeException e) {
@@ -52,10 +64,21 @@ public class PostController {
         }
     }
 
-    // DELETE /api/posts/{id} - Delete post
+    // DELETE /api/posts/{id} - 投稿を削除（本人のみ削除可能）
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
+    public ResponseEntity<Void> deletePost(
+            @PathVariable Long id,
+            @RequestParam Long userId) {
         try {
+            // 権限検証：本人の投稿かどうか確認
+            Post existingPost = postService.getPostEntityById(id);
+            if (existingPost == null) {
+                return ResponseEntity.notFound().build();
+            }
+            if (!existingPost.getUserId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
             postService.deletePost(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {

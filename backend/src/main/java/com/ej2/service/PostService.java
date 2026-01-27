@@ -46,7 +46,7 @@ public class PostService {
         return convertToPostDTOList(posts);
     }
 
-    // Get post by ID
+    // Get post by ID (DTO形式で返す)
     public Optional<PostDTO> getPostById(Long id) {
         Optional<Post> postOpt = postRepository.findById(id);
         if (postOpt.isPresent()) {
@@ -55,6 +55,11 @@ public class PostService {
             return Optional.of(new PostDTO(post, authorNickname));
         }
         return Optional.empty();
+    }
+
+    // 投稿エンティティを直接取得（権限検証用）
+    public Post getPostEntityById(Long id) {
+        return postRepository.findById(id).orElse(null);
     }
 
     // Create new post
