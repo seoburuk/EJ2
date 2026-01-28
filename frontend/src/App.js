@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import MainPage from './pages/Main/MainPage';
 import BoardListPage from './pages/Board/BoardListPage';
@@ -13,6 +13,7 @@ import UsersPage from './pages/Users/UsersPage';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import PasswordResetPage from './pages/Auth/PasswordResetPage';
+import ChatPage from './pages/Chat/ChatPage';
 import './App.css';
 
 function NavBar() {
@@ -25,6 +26,16 @@ function NavBar() {
   useEffect(() => {
     fetchBoards();
     checkUserLogin();
+
+    // ログイン・ログアウト時にNavBarの状態を更新するイベントリスナー
+    const handleAuthChange = () => {
+      checkUserLogin();
+    };
+    window.addEventListener('authChange', handleAuthChange);
+
+    return () => {
+      window.removeEventListener('authChange', handleAuthChange);
+    };
   }, []);
 
   // ユーザーのログイン状態を確認
@@ -32,6 +43,8 @@ function NavBar() {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
+    } else {
+      setUser(null);
     }
   };
 
@@ -135,6 +148,12 @@ function NavBar() {
             )}
           </li>
           <li className="nav-item">
+            <a href="/chat" className="nav-link" onClick={(e) => {
+              e.preventDefault();
+              window.open('/chat', 'ej2-chat', 'width=500,height=700,scrollbars=yes,resizable=yes');
+            }}>チャット</a>
+          </li>
+          <li className="nav-item">
             <Link to="/timetable" className="nav-link">時間割</Link>
           </li>
           <li className="nav-item">
@@ -162,30 +181,40 @@ function NavBar() {
   );
 }
 
+function AppContent() {
+  const location = useLocation();
+  const isChatPage = location.pathname === '/chat';
+
+  return (
+    <div className="App">
+      {!isChatPage && <NavBar />}
+
+      <main className={isChatPage ? 'main-content-chat' : 'main-content'}>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/boards" element={<BoardListPage />} />
+          <Route path="/boards/:boardId/posts" element={<PostListPage />} />
+          <Route path="/boards/:boardId/write" element={<PostWritePage />} />
+          <Route path="/boards/:boardId/posts/:postId" element={<PostDetailPage />} />
+          <Route path="/boards/:boardId/posts/:postId/edit" element={<PostEditPage />} />
+          <Route path="/chat" element={<ChatPage />} />
+          <Route path="/timetable" element={<TimetablePage />} />
+          <Route path="/users" element={<UsersPage />} />
+
+          {/* 認証ページ */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/password-reset" element={<PasswordResetPage />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
 function App() {
   return (
     <Router>
-      <div className="App">
-        <NavBar />
-
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<MainPage />} />
-            <Route path="/boards" element={<BoardListPage />} />
-            <Route path="/boards/:boardId/posts" element={<PostListPage />} />
-            <Route path="/boards/:boardId/write" element={<PostWritePage />} />
-            <Route path="/boards/:boardId/posts/:postId" element={<PostDetailPage />} />
-            <Route path="/boards/:boardId/posts/:postId/edit" element={<PostEditPage />} />
-            <Route path="/timetable" element={<TimetablePage />} />
-            <Route path="/users" element={<UsersPage />} />
-
-            {/* 認証ページ */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/password-reset" element={<PasswordResetPage />} />
-          </Routes>
-        </main>
-      </div>
+      <AppContent />
     </Router>
   );
 }

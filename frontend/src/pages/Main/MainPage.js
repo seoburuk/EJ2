@@ -195,8 +195,22 @@ function MainPage() {
           ))}
         </div>
 
-        {/* Right: Popular Posts Sidebar */}
+        {/* Right: Sidebar */}
         <div className="sidebar-eta">
+          {/* Chat Shortcut */}
+          <div className="chat-shortcut-section" onClick={() => {
+            window.open('/chat', 'ej2-chat', 'width=500,height=700,scrollbars=yes,resizable=yes');
+          }}>
+            <div className="chat-shortcut-content">
+              <span className="chat-shortcut-icon">💬</span>
+              <div>
+                <h3 className="chat-shortcut-title">匿名チャット</h3>
+                <p className="chat-shortcut-desc">リアルタイムで匿名チャットに参加しよう</p>
+              </div>
+            </div>
+            <span className="chat-shortcut-arrow">↗</span>
+          </div>
+
           <div className="popular-section-eta">
             <h3 className="sidebar-title-eta">인기글</h3>
             <div className="popular-list-eta">
