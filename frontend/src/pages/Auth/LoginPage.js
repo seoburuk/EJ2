@@ -60,7 +60,7 @@ function LoginPage() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2 className="auth-title">ログイン</h2>
+        <h2 className="auth-title">Welcome Back 👊</h2>
 
         {error && (
           <div className="auth-error">
@@ -78,7 +78,7 @@ function LoginPage() {
               value={formData.username}
               onChange={handleChange}
               required
-              placeholder="ユーザー名を入力"
+              placeholder="Username"
               disabled={loading}
             />
           </div>
@@ -92,7 +92,7 @@ function LoginPage() {
               value={formData.password}
               onChange={handleChange}
               required
-              placeholder="パスワードを入力"
+              placeholder="Password"
               disabled={loading}
             />
           </div>
@@ -102,16 +102,16 @@ function LoginPage() {
             className="auth-button"
             disabled={loading}
           >
-            {loading ? 'ログイン中...' : 'ログイン'}
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 
         <div className="auth-links">
-          <a href="/password-reset">パスワードをお忘れですか？</a>
-          <p>
-            アカウントをお持ちでないですか？
-            <a href="/register">会員登録</a>
-          </p>
+          <a href="/register">Sign Up</a>
+        </div>
+
+        <div className="concept-links">
+          view concept for <a href="/concept/mobile">mobile</a> or for <a href="/concept/desktop">desktop</a>
         </div>
       </div>
     </div>
