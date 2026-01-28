@@ -32,7 +32,7 @@
         </init-param>
         <init-param>
             <param-name>contextConfigLocation</param-name>
-            <param-value>com.ej2.config.WebConfig</param-value>
+            <param-value>com.ej2.config.WebConfig, com.ej2.config.WebSocketConfig</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>

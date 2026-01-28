@@ -71,6 +71,9 @@ function RegisterPage() {
         // 会員登録成功: ユーザー情報をlocalStorageに保存
         localStorage.setItem('user', JSON.stringify(response.data.user));
 
+        // NavBarにログイン状態の変更を通知
+        window.dispatchEvent(new Event('authChange'));
+
         // メインページへリダイレクト
         navigate('/');
       } else {

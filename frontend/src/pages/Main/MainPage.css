@@ -282,6 +282,53 @@
   gap: 3px;
 }
 
+/* Chat Shortcut */
+.chat-shortcut-section {
+  background: linear-gradient(135deg, #5c6bc0, #3f51b5);
+  border-radius: 8px;
+  padding: 18px 16px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.chat-shortcut-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(92, 107, 192, 0.35);
+}
+
+.chat-shortcut-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-shortcut-icon {
+  font-size: 28px;
+}
+
+.chat-shortcut-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+
+.chat-shortcut-desc {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.chat-shortcut-arrow {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 700;
+}
+
 /* Responsive Design */
 @media (max-width: 1100px) {
   .main-container-eta {

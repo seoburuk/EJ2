@@ -209,6 +209,12 @@
   padding: 0;
 }
 
+/* Chat popup window - no navbar, full height */
+.main-content-chat {
+  min-height: 100vh;
+  padding: 0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .nav-container {
