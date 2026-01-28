@@ -1,5 +1,6 @@
 package com.ej2.controller;
 
+import com.ej2.dto.CommentDTO;
 import com.ej2.model.Comment;
 import com.ej2.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,22 +20,22 @@ public class CommentController {
 
     // GET /api/comments/post/{postId} - Get all comments for a post
     @GetMapping("/post/{postId}")
-    public ResponseEntity<List<Comment>> getCommentsByPostId(@PathVariable Long postId) {
-        List<Comment> comments = commentService.getCommentsByPostId(postId);
+    public ResponseEntity<List<CommentDTO>> getCommentsByPostId(@PathVariable Long postId) {
+        List<CommentDTO> comments = commentService.getCommentsByPostId(postId);
         return ResponseEntity.ok(comments);
     }
 
     // GET /api/comments/post/{postId}/top - Get top-level comments only
     @GetMapping("/post/{postId}/top")
-    public ResponseEntity<List<Comment>> getTopLevelComments(@PathVariable Long postId) {
-        List<Comment> comments = commentService.getTopLevelComments(postId);
+    public ResponseEntity<List<CommentDTO>> getTopLevelComments(@PathVariable Long postId) {
+        List<CommentDTO> comments = commentService.getTopLevelComments(postId);
         return ResponseEntity.ok(comments);
     }
 
     // GET /api/comments/{id}/replies - Get replies for a comment
     @GetMapping("/{id}/replies")
-    public ResponseEntity<List<Comment>> getReplies(@PathVariable Long id) {
-        List<Comment> replies = commentService.getReplies(id);
+    public ResponseEntity<List<CommentDTO>> getReplies(@PathVariable Long id) {
+        List<CommentDTO> replies = commentService.getReplies(id);
         return ResponseEntity.ok(replies);
     }
 
