@@ -208,7 +208,7 @@ function CommentSection({ postId, boardId, isAnonymous }) {
             <div key={comment.id} className="comment-item">
               <div className="comment-header">
                 <span className="comment-author">
-                  {isAnonymous ? comment.anonymousId || '匿名' : `ユーザー${comment.userId}`}
+                  {isAnonymous ? comment.anonymousId || '匿名' : (comment.authorNickname || 'Unknown User')}
                 </span>
                 <span className="comment-time">{getTimeAgo(comment.createdAt)}</span>
               </div>
@@ -286,7 +286,7 @@ function CommentSection({ postId, boardId, isAnonymous }) {
                 <div key={reply.id} className="comment-item reply">
                   <div className="comment-header">
                     <span className="comment-author">
-                      {isAnonymous ? reply.anonymousId || '匿名' : `ユーザー${reply.userId}`}
+                      {isAnonymous ? reply.anonymousId || '匿名' : (reply.authorNickname || 'Unknown User')}
                     </span>
                     <span className="comment-time">{getTimeAgo(reply.createdAt)}</span>
                   </div>

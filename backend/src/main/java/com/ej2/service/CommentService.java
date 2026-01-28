@@ -1,16 +1,20 @@
 package com.ej2.service;
 
+import com.ej2.dto.CommentDTO;
 import com.ej2.model.Board;
 import com.ej2.model.Comment;
 import com.ej2.model.Post;
+import com.ej2.model.User;
 import com.ej2.repository.BoardRepository;
 import com.ej2.repository.CommentRepository;
 import com.ej2.repository.PostRepository;
+import com.ej2.repository.UserRepository;
 import com.ej2.util.AnonymousIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,16 +31,39 @@ public class CommentService {
     @Autowired
     private BoardRepository boardRepository;
 
-    public List<Comment> getCommentsByPostId(Long postId) {
-        return commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
+    @Autowired
+    private UserRepository userRepository;
+
+    public List<CommentDTO> getCommentsByPostId(Long postId) {
+        List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
+        return convertToCommentDTOList(comments);
     }
 
-    public List<Comment> getTopLevelComments(Long postId) {
-        return commentRepository.findByPostIdAndParentIdIsNullOrderByCreatedAtAsc(postId);
+    public List<CommentDTO> getTopLevelComments(Long postId) {
+        List<Comment> comments = commentRepository.findByPostIdAndParentIdIsNullOrderByCreatedAtAsc(postId);
+        return convertToCommentDTOList(comments);
     }
 
-    public List<Comment> getReplies(Long parentId) {
-        return commentRepository.findByParentIdOrderByCreatedAtAsc(parentId);
+    public List<CommentDTO> getReplies(Long parentId) {
+        List<Comment> comments = commentRepository.findByParentIdOrderByCreatedAtAsc(parentId);
+        return convertToCommentDTOList(comments);
+    }
+
+    private List<CommentDTO> convertToCommentDTOList(List<Comment> comments) {
+        List<CommentDTO> dtoList = new ArrayList<CommentDTO>();
+        for (Comment comment : comments) {
+            String authorNickname = getAuthorNickname(comment);
+            dtoList.add(new CommentDTO(comment, authorNickname));
+        }
+        return dtoList;
+    }
+
+    private String getAuthorNickname(Comment comment) {
+        User user = userRepository.findById(comment.getUserId());
+        if (user != null) {
+            return user.getName();
+        }
+        return "Unknown User";
     }
 
     public Optional<Comment> getCommentById(Long id) {
