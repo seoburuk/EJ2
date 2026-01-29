@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +23,19 @@ public class ChatService {
 
     @Autowired
     private ChatMessageRepository chatMessageRepository;
+
+    // アプリ起動時にグローバルルームを自動作成
+    @PostConstruct
+    public void initGlobalRoom() {
+        if (!chatRoomRepository.findById(1L).isPresent()) {
+            ChatRoom globalRoom = new ChatRoom();
+            globalRoom.setName("グローバルチャット");
+            globalRoom.setDescription("全員匿名のチャットルーム");
+            globalRoom.setNicknameCounter(0);
+            globalRoom.setCurrentUsers(0);
+            chatRoomRepository.save(globalRoom);
+        }
+    }
 
     // Room operations
     public List<ChatRoom> getAllRooms() {
@@ -76,13 +90,19 @@ public class ChatService {
         }
     }
 
-    // User leaves room
+    // User leaves room - reset nickname counter when room becomes empty
     public void userLeave(Long roomId) {
         Optional<ChatRoom> optRoom = chatRoomRepository.findById(roomId);
         if (optRoom.isPresent()) {
             ChatRoom room = optRoom.get();
             int count = room.getCurrentUsers() - 1;
             room.setCurrentUsers(Math.max(0, count));
+
+            // 채팅방에 아무도 없으면 익명 번호 리셋
+            if (count <= 0) {
+                room.setNicknameCounter(0);
+            }
+
             chatRoomRepository.save(room);
         }
     }
