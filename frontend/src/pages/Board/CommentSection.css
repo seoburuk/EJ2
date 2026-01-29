@@ -178,6 +178,16 @@
   border-color: #0366d6;
 }
 
+.comment-action-btn.liked {
+  background: #e6f3ff;
+  border-color: #0366d6;
+  color: #0366d6;
+}
+
+.comment-action-btn.liked:hover {
+  background: #cce5ff;
+}
+
 /* Comment Edit Form */
 .comment-edit-form {
   margin-bottom: 12px;

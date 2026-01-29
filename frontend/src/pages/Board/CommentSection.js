@@ -10,6 +10,7 @@ function CommentSection({ postId, boardId, isAnonymous }) {
   const [replyContent, setReplyContent] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editContent, setEditContent] = useState('');
+  const [likedComments, setLikedComments] = useState({});
 
   // 現在のユーザー情報を取得
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -22,6 +23,22 @@ function CommentSection({ postId, boardId, isAnonymous }) {
     try {
       const response = await axios.get(`/api/comments/post/${postId}`);
       setComments(response.data);
+
+      // Check like status for each comment
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const likeStatuses = {};
+      for (const comment of response.data) {
+        try {
+          const likeCheck = await axios.get(`/api/comments/${comment.id}/like/check`, {
+            params: { userId: user.id || null }
+          });
+          likeStatuses[comment.id] = likeCheck.data.liked;
+        } catch (e) {
+          likeStatuses[comment.id] = false;
+        }
+      }
+      setLikedComments(likeStatuses);
+
       setLoading(false);
     } catch (error) {
       console.error('コメントの読み込みに失敗しました:', error);
@@ -90,8 +107,29 @@ function CommentSection({ postId, boardId, isAnonymous }) {
 
   const handleLikeComment = async (commentId) => {
     try {
-      await axios.post(`/api/comments/${commentId}/like`);
-      fetchComments();
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const response = await axios.post(`/api/comments/${commentId}/like`, null, {
+        params: { userId: user.id || null }
+      });
+
+      // Update liked state locally
+      setLikedComments(prev => ({
+        ...prev,
+        [commentId]: response.data.liked
+      }));
+
+      // Update comment like count locally
+      setComments(prev => prev.map(comment => {
+        if (comment.id === commentId) {
+          return {
+            ...comment,
+            likeCount: response.data.liked
+              ? (comment.likeCount || 0) + 1
+              : Math.max(0, (comment.likeCount || 0) - 1)
+          };
+        }
+        return comment;
+      }));
     } catch (error) {
       console.error('いいねに失敗しました:', error);
     }
@@ -233,10 +271,10 @@ function CommentSection({ postId, boardId, isAnonymous }) {
 
               <div className="comment-actions">
                 <button
-                  className="comment-action-btn"
+                  className={`comment-action-btn ${likedComments[comment.id] ? 'liked' : ''}`}
                   onClick={() => handleLikeComment(comment.id)}
                 >
-                  👍 {comment.likeCount || 0}
+                  {likedComments[comment.id] ? '👍' : '👍'} {comment.likeCount || 0}
                 </button>
                 <button
                   className="comment-action-btn"
@@ -311,10 +349,10 @@ function CommentSection({ postId, boardId, isAnonymous }) {
 
                   <div className="comment-actions">
                     <button
-                      className="comment-action-btn"
+                      className={`comment-action-btn ${likedComments[reply.id] ? 'liked' : ''}`}
                       onClick={() => handleLikeComment(reply.id)}
                     >
-                      👍 {reply.likeCount || 0}
+                      {likedComments[reply.id] ? '👍' : '👍'} {reply.likeCount || 0}
                     </button>
                     {isOwnComment(reply) && !reply.isDeleted && (
                       <>
