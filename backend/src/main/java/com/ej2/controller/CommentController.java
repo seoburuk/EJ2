@@ -8,7 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/comments")
@@ -99,11 +102,40 @@ public class CommentController {
         }
     }
 
-    // POST /api/comments/{id}/like - Increment like count
+    // POST /api/comments/{id}/like - Toggle like on comment
     @PostMapping("/{id}/like")
-    public ResponseEntity<Void> incrementLikeCount(@PathVariable Long id) {
-        commentService.incrementLikeCount(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, Object>> toggleLike(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long userId,
+            HttpServletRequest request) {
+        String ipAddress = getClientIpAddress(request);
+        boolean liked = commentService.toggleLike(id, userId, ipAddress);
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("liked", liked);
+        return ResponseEntity.ok(response);
+    }
+
+    // GET /api/comments/{id}/like/check - Check if user has liked
+    @GetMapping("/{id}/like/check")
+    public ResponseEntity<Map<String, Object>> checkLikeStatus(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long userId,
+            HttpServletRequest request) {
+        String ipAddress = getClientIpAddress(request);
+        boolean liked = commentService.hasUserLiked(id, userId, ipAddress);
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("liked", liked);
+        return ResponseEntity.ok(response);
+    }
+
+    private String getClientIpAddress(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 
     // GET /api/comments/post/{postId}/count - Get comment count

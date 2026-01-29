@@ -3,9 +3,11 @@ package com.ej2.service;
 import com.ej2.dto.CommentDTO;
 import com.ej2.model.Board;
 import com.ej2.model.Comment;
+import com.ej2.model.CommentLikeLog;
 import com.ej2.model.Post;
 import com.ej2.model.User;
 import com.ej2.repository.BoardRepository;
+import com.ej2.repository.CommentLikeLogRepository;
 import com.ej2.repository.CommentRepository;
 import com.ej2.repository.PostRepository;
 import com.ej2.repository.UserRepository;
@@ -24,6 +26,9 @@ public class CommentService {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private CommentLikeLogRepository commentLikeLogRepository;
 
     @Autowired
     private PostRepository postRepository;
@@ -116,10 +121,45 @@ public class CommentService {
         return commentRepository.countByPostId(postId);
     }
 
-    public void incrementLikeCount(Long id) {
-        Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Comment not found with id: " + id));
-        comment.setLikeCount(comment.getLikeCount() + 1);
-        commentRepository.save(comment);
+    /**
+     * Toggle like on a comment. Returns true if liked, false if unliked.
+     */
+    public boolean toggleLike(Long commentId, Long userId, String ipAddress) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Comment not found with id: " + commentId));
+
+        Optional<CommentLikeLog> existingLike;
+
+        if (userId != null) {
+            existingLike = commentLikeLogRepository.findByCommentIdAndUserId(commentId, userId);
+        } else {
+            existingLike = commentLikeLogRepository.findByCommentIdAndIpAddress(commentId, ipAddress);
+        }
+
+        if (existingLike.isPresent()) {
+            // Already liked - remove like (toggle off)
+            commentLikeLogRepository.delete(existingLike.get());
+            comment.setLikeCount(Math.max(0, comment.getLikeCount() - 1));
+            commentRepository.save(comment);
+            return false;
+        } else {
+            // Not liked yet - add like
+            CommentLikeLog likeLog = new CommentLikeLog(commentId, userId, ipAddress);
+            commentLikeLogRepository.save(likeLog);
+            comment.setLikeCount(comment.getLikeCount() + 1);
+            commentRepository.save(comment);
+            return true;
+        }
+    }
+
+    /**
+     * Check if user has liked a specific comment
+     */
+    public boolean hasUserLiked(Long commentId, Long userId, String ipAddress) {
+        if (userId != null) {
+            return commentLikeLogRepository.findByCommentIdAndUserId(commentId, userId).isPresent();
+        } else {
+            return commentLikeLogRepository.findByCommentIdAndIpAddress(commentId, ipAddress).isPresent();
+        }
     }
 }
