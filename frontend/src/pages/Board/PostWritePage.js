@@ -178,7 +178,7 @@ function PostWritePage() {
     if (window.confirm('作成中の内容が失われますが、よろしいですか?')) {
       // Clean up preview URLs
       imagePreviewUrls.forEach(url => URL.revokeObjectURL(url));
-      navigate(`/boards/${boardId}`, { state: { board } });
+      navigate(`/boards/${boardId}/posts`, { state: { board } }); // /posts 누락된부분 추가
     }
   };
 
