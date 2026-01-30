@@ -26,6 +26,7 @@ function NavBar() {
   const [user, setUser] = useState(null);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     fetchBoards();
@@ -40,7 +41,7 @@ function NavBar() {
     return () => {
       window.removeEventListener('authChange', handleAuthChange);
     };
-  }, []);
+  }, [location]); // location 추가해서 페이지 이동시마다 확인하도록....
 
   // ユーザーのログイン状態を確認
   const checkUserLogin = () => {
