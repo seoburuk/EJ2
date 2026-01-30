@@ -111,6 +111,8 @@ function LoginPage() {
 
         <div className="auth-links">
           <a href="/register">Sign Up</a>
+          <span style={{ margin: '0 8px', color: '#ccc' }}>|</span>
+          <a href="/find-account">ID / パスワードを探す</a>
         </div>
 
         <div className="concept-links">

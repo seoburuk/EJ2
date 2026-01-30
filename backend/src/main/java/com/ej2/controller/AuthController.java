@@ -86,6 +86,18 @@ public class AuthController {
     }
 
     /**
+     * ID検索エンドポイント
+     * POST /api/auth/find-username
+     * @param request リクエスト（email, name）
+     * @return 認証レスポンス（ユーザー名を含む）
+     */
+    @PostMapping("/find-username")
+    public ResponseEntity<AuthResponse> findUsername(@RequestBody FindUsernameRequest request) {
+        AuthResponse response = authService.findUsernameByEmailAndName(request.getEmail(), request.getName());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * パスワードリセットリクエストエンドポイント
      * POST /api/auth/password-reset/request
      * @param request パスワードリセットリクエスト（email）

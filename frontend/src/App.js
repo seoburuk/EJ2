@@ -13,6 +13,7 @@ import UsersPage from './pages/Users/UsersPage';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import PasswordResetPage from './pages/Auth/PasswordResetPage';
+import FindAccountPage from './pages/Auth/FindAccountPage';
 import ChatPage from './pages/Chat/ChatPage';
 import './App.css';
 
@@ -205,6 +206,7 @@ function AppContent() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/password-reset" element={<PasswordResetPage />} />
+          <Route path="/find-account" element={<FindAccountPage />} />
         </Routes>
       </main>
     </div>
