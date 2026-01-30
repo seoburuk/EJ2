@@ -124,7 +124,15 @@ function ChatPage() {
 
   const formatTime = (dateString) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
+    const dateStr = String(dateString);
+    const year = dateStr.substring(0, 4);
+    const month = dateStr.substring(4, 6);
+    const day = dateStr.substring(6, 8);
+    const hour = dateStr.substring(8, 10);
+    const min = dateStr.substring(10, 12);
+    const sec = dateStr.substring(12, 14);
+    const date = new Date(year, month, day, hour, min, sec);
+    
     return date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
   };
 
@@ -176,7 +184,7 @@ function ChatPage() {
       <form className="chat-input-area" onSubmit={sendMessage}>
         <input
           type="text"
-          placeholder="メッセージを入力..."
+          placeholder="メッセージを入力...!"
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           className="chat-input"
