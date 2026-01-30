@@ -104,6 +104,27 @@ public class AuthService {
     }
 
     /**
+     * メールアドレスと名前からユーザー名を検索
+     * @param email メールアドレス
+     * @param name 名前
+     * @return 認証レスポンス（ユーザー名を含む）
+     */
+    public AuthResponse findUsernameByEmailAndName(String email, String name) {
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            return new AuthResponse(false, "該当するユーザーが見つかりません");
+        }
+
+        // 名前が一致するか確認
+        if (!user.getName().equals(name)) {
+            return new AuthResponse(false, "該当するユーザーが見つかりません");
+        }
+
+        return new AuthResponse(true, "ID: " + user.getUsername());
+    }
+
+    /**
      * パスワードリセットトークンを生成してメール送信（メール送信は今回は省略）
      * @param request パスワードリセットリクエスト
      * @return 認証レスポンス

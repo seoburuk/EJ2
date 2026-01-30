@@ -165,6 +165,37 @@
   text-decoration: underline;
 }
 
+/* 탭 스타일 (아이디/비밀번호 찾기) */
+.find-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #e8e8e8;
+}
+
+.find-tab {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.find-tab:hover {
+  color: #333;
+}
+
+.find-tab.active {
+  background: #1e293b;
+  color: white;
+}
+
 /* レスポンシブデザイン */
 @media (max-width: 768px) {
   .auth-card {
