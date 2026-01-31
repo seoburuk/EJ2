@@ -33,15 +33,6 @@ public class SecurityConfig {
                 // 로긴필요한 get방식 api가 있나? 잇다면 추가...
                 .anyRequest().permitAll()  // 나머진 프리
             )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
-                .permitAll()
-            )
             .csrf(csrf -> csrf.disable());  // 개발할때만?
 
         http.exceptionHandling(handler -> handler

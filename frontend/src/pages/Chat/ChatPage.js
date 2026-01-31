@@ -124,15 +124,10 @@ function ChatPage() {
 
   const formatTime = (dateString) => {
     if (!dateString) return '';
-    const dateStr = String(dateString);
-    const year = dateStr.substring(0, 4);
-    const month = dateStr.substring(4, 6);
-    const day = dateStr.substring(6, 8);
-    const hour = dateStr.substring(8, 10);
-    const min = dateStr.substring(10, 12);
-    const sec = dateStr.substring(12, 14);
-    const date = new Date(year, month, day, hour, min, sec);
-    
+    const [year, month, day, hour, min, sec] = String(dateString).split(',').map(Number);
+    const date = new Date(year, month - 1, day, hour, min, sec); // 자바스크립트 month가 0부터 시작이라 파싱해서 -1 해줘야함;;;;
+
+    console.log('converted :' + date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }));
     return date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
   };
 
