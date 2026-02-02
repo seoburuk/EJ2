@@ -97,6 +97,8 @@ public class ChatService {
             ChatRoom room = optRoom.get();
             int count = room.getCurrentUsers() - 1;
             room.setCurrentUsers(Math.max(0, count));
+            int nickCnt = room.getNicknameCounter() - 1;
+            room.setNicknameCounter(nickCnt);
 
             // 채팅방에 아무도 없으면 익명 번호 리셋
             if (count <= 0) {
