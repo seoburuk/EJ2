@@ -39,6 +39,7 @@ yarn-error.log*
 target/
 *.war
 *.jar
+*.class
 build/
 dist/
 
