@@ -26,7 +26,7 @@ import java.util.Properties;
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages = "com.ej2.repository")
 @MapperScan(basePackages = "com.ej2.mapper")
-@ComponentScan(basePackages = {"com.ej2.service", "com.ej2.repository"})
+@ComponentScan(basePackages = {"com.ej2.service", "com.ej2.repository", "com.ej2.config"})
 @PropertySource("classpath:application.properties")
 public class RootConfig {
 

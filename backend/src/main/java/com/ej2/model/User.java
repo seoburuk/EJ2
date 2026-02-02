@@ -36,6 +36,10 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("role")
+    @Column(nullable = false, length = 20)
+    private String role = "USER";  // ADMIN 또는 USER
+
     public User() {
     }
 
@@ -128,5 +132,13 @@ public class User {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

@@ -94,15 +94,8 @@ function ChatPage() {
 
   const disconnectSync = () => {
     if (stompClientRef.current) {
-      const currentNickname = nicknameRef.current;
-      if (currentNickname) {
-        try {
-          stompClientRef.current.publish({
-            destination: `/app/chat/${GLOBAL_ROOM_ID}/leave`,
-            body: JSON.stringify({ senderNickname: currentNickname, type: 'LEAVE' })
-          });
-        } catch (e) {}
-      }
+      // leave 메시지는 보내지 않음 - WebSocketEventListener가 disconnect 시 자동 처리
+      // 중복 호출 방지: userLeave()가 두 번 호출되면 currentUsers가 음수가 되어 리셋 로직이 깨짐
       try {
         if (subscriptionRef.current) {
           subscriptionRef.current.unsubscribe();

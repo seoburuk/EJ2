@@ -329,6 +329,100 @@
   font-weight: 700;
 }
 
+/* Admin Shortcut */
+.admin-shortcut-section {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 8px;
+  padding: 18px 16px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-shortcut-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.admin-shortcut-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-shortcut-icon {
+  font-size: 28px;
+}
+
+.admin-shortcut-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+
+.admin-shortcut-desc {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.admin-shortcut-arrow {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 700;
+}
+
+/* Users Shortcut */
+.users-shortcut-section {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  border-radius: 8px;
+  padding: 18px 16px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.users-shortcut-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(240, 147, 251, 0.4);
+}
+
+.users-shortcut-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.users-shortcut-icon {
+  font-size: 28px;
+}
+
+.users-shortcut-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+
+.users-shortcut-desc {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.users-shortcut-arrow {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 700;
+}
+
 /* Responsive Design */
 @media (max-width: 1100px) {
   .main-container-eta {

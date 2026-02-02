@@ -203,6 +203,21 @@
   color: #1d4ed8;
 }
 
+/* 管理者リンクスタイル */
+.nav-admin {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.nav-admin:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
 /* Main Content */
 .main-content {
   min-height: calc(100vh - 70px);

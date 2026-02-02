@@ -1,4 +1,5 @@
-# Troubleshooting Guide 0129_2 - 댓글 좋아요 무한 클릭 문제 해결
+# Troubleshooting Guide 0129_2 - 댓글 
+좋아요 무한 클릭 문제 해결
 
 ## 문제 설명
 

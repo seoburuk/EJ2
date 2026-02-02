@@ -106,4 +106,42 @@ public class UserRepository {
             entityManager.remove(user);
         }
     }
+
+    // ==================== 管理者ダッシュボード用メソッド ====================
+
+    /**
+     * 全ユーザー数を取得
+     */
+    public Long countAll() {
+        return entityManager.createQuery("SELECT COUNT(u) FROM User u", Long.class)
+                .getSingleResult();
+    }
+
+    /**
+     * 役割別ユーザー数を取得
+     */
+    public Long countByRole(String role) {
+        return entityManager.createQuery("SELECT COUNT(u) FROM User u WHERE u.role = :role", Long.class)
+                .setParameter("role", role)
+                .getSingleResult();
+    }
+
+    /**
+     * ページネーション付きユーザー一覧取得
+     */
+    public List<User> findAllWithPagination(int offset, int limit) {
+        return entityManager.createQuery("SELECT u FROM User u ORDER BY u.createdAt DESC", User.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+
+    /**
+     * 最近登録されたユーザー取得
+     */
+    public List<User> getRecentUsers(int limit) {
+        return entityManager.createQuery("SELECT u FROM User u ORDER BY u.createdAt DESC", User.class)
+                .setMaxResults(limit)
+                .getResultList();
+    }
 }

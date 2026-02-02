@@ -33,13 +33,23 @@ const TimetablePage: React.FC = () => {
     }
   }, [selectedSemester, selectedYear, currentUser]);
 
-  const checkLogin = () => {
+  const checkLogin = async () => {
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
-    } else {
-      // 미로그인 시 로그인 페이지로 리다이렉트
+    if (!storedUser) {
+      // localStorage에 user 없으면 바로 로그인 페이지로
       navigate('/login', { state: { from: '/timetable', message: '시간표를 보려면 로그인이 필요합니다.' } });
+      return;
+    }
+
+    // localStorage에 user가 있어도 백엔드 세션이 유효한지 확인
+    try {
+      await axios.get('/api/auth/me', { withCredentials: true });
+      // 세션 유효 → 로그인 상태 유지
+      setCurrentUser(JSON.parse(storedUser));
+    } catch (error: any) {
+      // 세션 만료 또는 무효 → localStorage 정리 후 로그인 페이지로
+      localStorage.removeItem('user');
+      navigate('/login', { state: { from: '/timetable', message: '세션이 만료되었습니다. 다시 로그인해주세요.' } });
     }
   };
 

@@ -9,10 +9,33 @@ function MainPage() {
   const [boardPosts, setBoardPosts] = useState({});
   const [popularPosts, setPopularPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     fetchBoardsAndPosts();
+    checkUserLogin();
+
+    // ログイン・ログアウト時にMainPageの状態を更新するイベントリスナー
+    const handleAuthChange = () => {
+      checkUserLogin();
+    };
+    window.addEventListener('authChange', handleAuthChange);
+
+    return () => {
+      window.removeEventListener('authChange', handleAuthChange);
+    };
   }, []);
+
+  // ユーザーのログイン状態を確認
+  const checkUserLogin = () => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      console.log('Logged in user:', parsedUser);
+      console.log('User role:', parsedUser.role);
+      setUser(parsedUser);
+    }
+  };
 
   const fetchBoardsAndPosts = async () => {
     try {
@@ -209,6 +232,78 @@ function MainPage() {
               </div>
             </div>
             <span className="chat-shortcut-arrow">↗</span>
+          </div>
+
+          {/* Debug Info - 開発用 */}
+          <div style={{
+            background: user ? '#fff3cd' : '#f8d7da',
+            padding: '10px',
+            marginBottom: '10px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            border: user ? '1px solid #ffc107' : '1px solid #f5c6cb'
+          }}>
+            <strong>Debug Info:</strong><br/>
+            {user ? (
+              <>
+                Username: {user.username || 'N/A'}<br/>
+                Name: {user.name || 'N/A'}<br/>
+                Role: {user.role || 'N/A'}<br/>
+                Is ADMIN: {user.role === 'ADMIN' ? 'YES' : 'NO'}
+              </>
+            ) : (
+              <>
+                User: NULL (Not logged in or localStorage empty)<br/>
+                localStorage 'user': {localStorage.getItem('user') ? 'EXISTS' : 'EMPTY'}
+              </>
+            )}
+            <button
+              onClick={() => {
+                const stored = localStorage.getItem('user');
+                console.log('Raw localStorage:', stored);
+                if (stored) {
+                  const parsed = JSON.parse(stored);
+                  console.log('Parsed user:', parsed);
+                  alert('Check console for details');
+                } else {
+                  alert('No user in localStorage');
+                }
+              }}
+              style={{
+                marginTop: '8px',
+                padding: '4px 8px',
+                fontSize: '11px',
+                cursor: 'pointer'
+              }}
+            >
+              Check localStorage
+            </button>
+          </div>
+
+          {/* Admin Shortcut - ADMINのみ表示 */}
+          {user && user.role === 'ADMIN' && (
+            <div className="admin-shortcut-section" onClick={() => navigate('/admin')}>
+              <div className="admin-shortcut-content">
+                <span className="admin-shortcut-icon">🛡️</span>
+                <div>
+                  <h3 className="admin-shortcut-title">管理者ダッシュボード</h3>
+                  <p className="admin-shortcut-desc">システム統計と管理機能</p>
+                </div>
+              </div>
+              <span className="admin-shortcut-arrow">→</span>
+            </div>
+          )}
+
+          {/* Users Shortcut */}
+          <div className="users-shortcut-section" onClick={() => navigate('/users')}>
+            <div className="users-shortcut-content">
+              <span className="users-shortcut-icon">👥</span>
+              <div>
+                <h3 className="users-shortcut-title">ユーザー管理</h3>
+                <p className="users-shortcut-desc">ユーザー一覧と情報を確認</p>
+              </div>
+            </div>
+            <span className="users-shortcut-arrow">→</span>
           </div>
 
           <div className="popular-section-eta">

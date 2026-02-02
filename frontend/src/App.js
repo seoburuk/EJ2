@@ -15,6 +15,9 @@ import RegisterPage from './pages/Auth/RegisterPage';
 import PasswordResetPage from './pages/Auth/PasswordResetPage';
 import FindAccountPage from './pages/Auth/FindAccountPage';
 import ChatPage from './pages/Chat/ChatPage';
+import AdminPage from './pages/Admin/AdminPage';
+import AdminUsersPage from './pages/Admin/AdminUsersPage';
+import AdminBoardsPage from './pages/Admin/AdminBoardsPage';
 import './App.css';
 
 function NavBar() {
@@ -161,6 +164,15 @@ function NavBar() {
             <Link to="/users" className="nav-link">ユーザー</Link>
           </li>
 
+          {/* 管理者メニュー（ADMINのみ表示） */}
+          {user && user.role === 'ADMIN' && (
+            <li className="nav-item">
+              <Link to="/admin" className="nav-link nav-admin">
+                🛡️ 管理者
+              </Link>
+            </li>
+          )}
+
           {/* 認証ボタン */}
           <li className="nav-item nav-auth">
             {user ? (
@@ -207,6 +219,11 @@ function AppContent() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/password-reset" element={<PasswordResetPage />} />
           <Route path="/find-account" element={<FindAccountPage />} />
+
+          {/* 管理者ページ */}
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/users" element={<AdminUsersPage />} />
+          <Route path="/admin/boards" element={<AdminBoardsPage />} />
         </Routes>
       </main>
     </div>
