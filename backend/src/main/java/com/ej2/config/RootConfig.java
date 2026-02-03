@@ -42,9 +42,9 @@ public class RootConfig {
         String password = System.getenv("SPRING_DATASOURCE_PASSWORD");
 
         dataSource.setDriverClassName("org.mariadb.jdbc.Driver");
-        dataSource.setUrl(url != null ? url : "jdbc:mariadb://localhost:3306/ej2");
-        dataSource.setUsername(username != null ? username : "root");
-        dataSource.setPassword(password != null ? password : "tn1111");
+        dataSource.setUrl(url != null ? url : "jdbc:mariadb://localhost:3306/appdb");
+        dataSource.setUsername(username != null ? username : "appuser");
+        dataSource.setPassword(password != null ? password : "apppassword");
         dataSource.setInitialSize(5);
         dataSource.setMaxTotal(10);
 

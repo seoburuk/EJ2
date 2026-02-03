@@ -3,6 +3,10 @@ package com.ej2.service;
 import com.ej2.dto.ActivityDTO;
 import com.ej2.dto.BoardPostStatsDTO;
 import com.ej2.dto.DashboardStatsDTO;
+import com.ej2.dto.ReportDTO;
+import com.ej2.dto.ReportDetailDTO;
+import com.ej2.dto.ReportSearchCriteria;
+import com.ej2.dto.ReportStatsDTO;
 import com.ej2.dto.WeeklyStatDTO;
 import com.ej2.mapper.AdminMapper;
 import com.ej2.model.Board;
@@ -11,6 +15,7 @@ import com.ej2.model.User;
 import com.ej2.repository.BoardRepository;
 import com.ej2.repository.PostRepository;
 import com.ej2.repository.UserRepository;
+import com.ej2.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +44,9 @@ public class AdminService {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private ReportService reportService;
 
     // ==================== ユーザー管理 ====================
 
@@ -259,5 +267,162 @@ public class AdminService {
         }
 
         return result;
+    }
+
+    // ==================== ユーザー停止管理 ====================
+
+    /**
+     * ユーザーを停止
+     * @param userId 停止対象ユーザーID
+     * @param duration 停止期間 ("1_DAY", "3_DAYS", "7_DAYS", "30_DAYS", "PERMANENT")
+     * @param reason 停止理由
+     */
+    public void suspendUser(Long userId, String duration, String reason) {
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            throw new RuntimeException("User not found: " + userId);
+        }
+
+        LocalDateTime suspendedUntil = null;
+
+        // 期間に応じてsuspendedUntilを計算
+        if (!"PERMANENT".equals(duration)) {
+            LocalDateTime now = LocalDateTime.now();
+            switch (duration) {
+                case "1_DAY":
+                    suspendedUntil = now.plusDays(1);
+                    break;
+                case "3_DAYS":
+                    suspendedUntil = now.plusDays(3);
+                    break;
+                case "7_DAYS":
+                    suspendedUntil = now.plusDays(7);
+                    break;
+                case "30_DAYS":
+                    suspendedUntil = now.plusDays(30);
+                    break;
+                default:
+                    throw new RuntimeException("Invalid duration: " + duration);
+            }
+            user.setStatus("SUSPENDED");
+        } else {
+            // 永久停止の場合はsuspendedUntilをnullに
+            user.setStatus("BANNED");
+        }
+
+        user.setSuspendedUntil(suspendedUntil);
+        user.setSuspensionReason(reason);
+        userRepository.save(user);
+    }
+
+    /**
+     * ユーザー停止を解除
+     * @param userId 対象ユーザーID
+     */
+    public void unsuspendUser(Long userId) {
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            throw new RuntimeException("User not found: " + userId);
+        }
+
+        user.setStatus("ACTIVE");
+        user.setSuspendedUntil(null);
+        user.setSuspensionReason(null);
+        userRepository.save(user);
+    }
+
+    /**
+     * ユーザーが停止中かチェック（期限切れ自動解除付き）
+     * @param userId チェック対象ユーザーID
+     * @return 停止中ならtrue
+     */
+    public boolean isUserSuspended(Long userId) {
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            return false;
+        }
+
+        // BANNED（永久停止）の場合は常にtrue
+        if ("BANNED".equals(user.getStatus())) {
+            return true;
+        }
+
+        // SUSPENDED（一時停止）の場合
+        if ("SUSPENDED".equals(user.getStatus())) {
+            // 期限が設定されていない場合は停止中
+            if (user.getSuspendedUntil() == null) {
+                return true;
+            }
+
+            // 期限チェック
+            LocalDateTime now = LocalDateTime.now();
+            if (now.isBefore(user.getSuspendedUntil())) {
+                // まだ期限内
+                return true;
+            } else {
+                // 期限切れ → 自動解除
+                user.setStatus("ACTIVE");
+                user.setSuspendedUntil(null);
+                user.setSuspensionReason(null);
+                userRepository.save(user);
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    // ==================== 報告管理 ====================
+
+    /**
+     * 報告統計を取得
+     */
+    public ReportStatsDTO getReportStats() {
+        return reportService.getReportStats();
+    }
+
+    /**
+     * 報告を検索（フィルタリング・ソート・ページネーション）
+     */
+    public Map<String, Object> searchReports(
+            String status, String reportType, String sortBy, String sortOrder, int page, int size) {
+        ReportSearchCriteria criteria = new ReportSearchCriteria();
+        criteria.setStatus(status);
+        criteria.setReportType(reportType);
+        criteria.setSortBy(sortBy);
+        criteria.setSortOrder(sortOrder);
+
+        List<ReportDTO> reports = reportService.searchReports(criteria, page, size);
+        int totalCount = reportService.countReports(criteria);
+
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("reports", reports);
+        result.put("totalCount", totalCount);
+        result.put("currentPage", page);
+        result.put("pageSize", size);
+        result.put("totalPages", (int) Math.ceil((double) totalCount / size));
+
+        return result;
+    }
+
+    /**
+     * 報告詳細を取得
+     */
+    public ReportDetailDTO getReportDetail(Long reportId) {
+        return reportService.getReportDetail(reportId);
+    }
+
+    /**
+     * 報告のステータスを更新
+     */
+    public void updateReportStatus(Long reportId, String status, String adminNote, Long adminId) {
+        reportService.updateReportStatus(reportId, status, adminNote, adminId);
+    }
+
+    /**
+     * モデレーションアクションを実行
+     */
+    public void takeModerationAction(Long reportId, String action, String adminNote, Long adminId) {
+        reportService.takeModerationAction(reportId, action, adminNote, adminId);
     }
 }

@@ -353,6 +353,7 @@ ls -lh target/ej2.war
 # -rw-r--r--  1 user  staff   15M  1 18 14:30 target/ej2.war
 ```
 
+
 **🔍 무슨 일이 일어나는가?**
 - `mvn clean`: 이전 빌드 결과물 삭제
 - `mvn package`: Java 코드를 컴파일하고 WAR 파일로 패키징

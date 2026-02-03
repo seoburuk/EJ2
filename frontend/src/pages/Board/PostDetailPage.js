@@ -13,6 +13,11 @@ function PostDetailPage() {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // 報告モーダル状態
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState('SPAM');
+  const [reportDescription, setReportDescription] = useState('');
+
   useEffect(() => {
     fetchPost();
     incrementViewCount();
@@ -121,6 +126,40 @@ function PostDetailPage() {
     return user.id && post && user.id === post.userId;
   };
 
+  // 報告提出ハンドラ
+  const handleSubmitReport = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user.id) {
+        alert('ログインが必要です');
+        return;
+      }
+
+      await axios.post(
+        'http://localhost:8080/ej2/api/reports',
+        {
+          reportType: 'POST',
+          entityId: parseInt(postId),
+          reason: reportReason,
+          description: reportDescription
+        },
+        { withCredentials: true }
+      );
+
+      alert('報告が受理されました');
+      setShowReportModal(false);
+      setReportReason('SPAM');
+      setReportDescription('');
+    } catch (error) {
+      console.error('報告の提出に失敗しました:', error);
+      if (error.response?.data?.message) {
+        alert(error.response.data.message);
+      } else {
+        alert('報告の提出に失敗しました');
+      }
+    }
+  };
+
   const getFormattedDate = (dateString) => {
     if (!dateString) return '---';
 
@@ -155,6 +194,14 @@ function PostDetailPage() {
           </button>
           <div className="header-right">
             <div className="board-badge">{board?.name || '掲示板'}</div>
+            {!canModifyPost() && (
+              <button
+                className="report-button"
+                onClick={() => setShowReportModal(true)}
+              >
+                🚨 報告
+              </button>
+            )}
             {canModifyPost() && (
               <>
                 <button className="edit-button" onClick={handleEdit}>
@@ -224,6 +271,96 @@ function PostDetailPage() {
           isAnonymous={board?.isAnonymous || false}
         />
       </div>
+
+      {/* 報告モーダル */}
+      {showReportModal && (
+        <div className="modal-overlay" onClick={() => setShowReportModal(false)}>
+          <div className="report-modal" onClick={(e) => e.stopPropagation()}>
+            <h2>投稿を報告</h2>
+            <p className="modal-description">
+              この投稿が利用規約に違反していると思われる場合は、以下のフォームで報告してください。
+            </p>
+
+            <div className="form-group">
+              <label>報告理由 <span className="required">*</span></label>
+              <div className="radio-group">
+                <label className="radio-label">
+                  <input
+                    type="radio"
+                    value="SPAM"
+                    checked={reportReason === 'SPAM'}
+                    onChange={(e) => setReportReason(e.target.value)}
+                  />
+                  <span>スパム/広告</span>
+                </label>
+                <label className="radio-label">
+                  <input
+                    type="radio"
+                    value="HARASSMENT"
+                    checked={reportReason === 'HARASSMENT'}
+                    onChange={(e) => setReportReason(e.target.value)}
+                  />
+                  <span>嫌がらせ</span>
+                </label>
+                <label className="radio-label">
+                  <input
+                    type="radio"
+                    value="INAPPROPRIATE"
+                    checked={reportReason === 'INAPPROPRIATE'}
+                    onChange={(e) => setReportReason(e.target.value)}
+                  />
+                  <span>不適切なコンテンツ</span>
+                </label>
+                <label className="radio-label">
+                  <input
+                    type="radio"
+                    value="HATE_SPEECH"
+                    checked={reportReason === 'HATE_SPEECH'}
+                    onChange={(e) => setReportReason(e.target.value)}
+                  />
+                  <span>ヘイトスピーチ</span>
+                </label>
+                <label className="radio-label">
+                  <input
+                    type="radio"
+                    value="OTHER"
+                    checked={reportReason === 'OTHER'}
+                    onChange={(e) => setReportReason(e.target.value)}
+                  />
+                  <span>その他</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>詳細説明 (任意)</label>
+              <textarea
+                className="report-textarea"
+                placeholder="報告の詳細を入力してください..."
+                value={reportDescription}
+                onChange={(e) => setReportDescription(e.target.value)}
+                rows="4"
+              />
+            </div>
+
+            <div className="modal-buttons">
+              <button
+                className="cancel-button"
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportReason('SPAM');
+                  setReportDescription('');
+                }}
+              >
+                キャンセル
+              </button>
+              <button className="submit-button" onClick={handleSubmitReport}>
+                報告する
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

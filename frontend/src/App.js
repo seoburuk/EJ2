@@ -18,6 +18,7 @@ import ChatPage from './pages/Chat/ChatPage';
 import AdminPage from './pages/Admin/AdminPage';
 import AdminUsersPage from './pages/Admin/AdminUsersPage';
 import AdminBoardsPage from './pages/Admin/AdminBoardsPage';
+import AdminReportsPage from './pages/Admin/AdminReportsPage';
 import './App.css';
 
 function NavBar() {
@@ -224,6 +225,7 @@ function AppContent() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/admin/boards" element={<AdminBoardsPage />} />
+          <Route path="/admin/reports" element={<AdminReportsPage />} />
         </Routes>
       </main>
     </div>

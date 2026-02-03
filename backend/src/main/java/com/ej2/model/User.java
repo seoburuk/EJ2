@@ -40,6 +40,15 @@ public class User {
     @Column(nullable = false, length = 20)
     private String role = "USER";  // ADMIN 또는 USER
 
+    @Column(nullable = false, length = 20)
+    private String status = "ACTIVE";  // ACTIVE, SUSPENDED, BANNED
+
+    @Column(name = "suspended_until")
+    private LocalDateTime suspendedUntil;
+
+    @Column(name = "suspension_reason", columnDefinition = "TEXT")
+    private String suspensionReason;
+
     public User() {
     }
 
@@ -140,5 +149,29 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getSuspendedUntil() {
+        return suspendedUntil;
+    }
+
+    public void setSuspendedUntil(LocalDateTime suspendedUntil) {
+        this.suspendedUntil = suspendedUntil;
+    }
+
+    public String getSuspensionReason() {
+        return suspensionReason;
+    }
+
+    public void setSuspensionReason(String suspensionReason) {
+        this.suspensionReason = suspensionReason;
     }
 }
