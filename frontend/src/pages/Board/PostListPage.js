@@ -18,7 +18,7 @@ function PostListPage() {
 
   useEffect(() => {
     fetchPosts();
-  }, [boardId, currentPage, sortBy]);
+  }, [boardId, currentPage]);
 
   const fetchPosts = async () => {
     try {
@@ -42,9 +42,28 @@ function PostListPage() {
     }
   };
 
-  const handleSortChange = (newSortBy) => {
-    setSortBy(newSortBy);
-    setCurrentPage(0);
+  const handleSortChange = async (newSortBy) => {
+    console.log('선택한 정렬: ' + newSortBy);
+    if (newSortBy == 'active') {
+      console.log('이미 보고잇는 정렬');
+      return;
+    }
+
+    try {
+      const response = await axios.get(`api/posts/board/${boardId}/${newSortBy}`);
+
+      const sortedPosts = Array.isArray(response.data) ? response.data : [];
+      setPosts(sortedPosts);
+      setTotalPages(Math.ceil(sortedPosts.length / 20));
+      setLoading(false);
+      setSortBy(newSortBy);
+      setCurrentPage(0);
+    }
+
+    catch(error) {
+      console.error("정렬실패", error);
+      fetchPosts();
+    }
   };
 
   const handleSearch = async () => {

@@ -173,4 +173,21 @@ public class PostController {
         postService.incrementLikeCount(id, userId, ipAddress);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/board/{boardId}/{sortBy}")
+    public ResponseEntity<List<PostDTO>> sortPostByMean(@PathVariable Long boardId, @PathVariable String sortBy) {
+        List<PostDTO> posts = null;
+
+        if (sortBy.equals("recent")) {
+            posts = postService.getPostsByBoardId(boardId);
+        }
+        else if (sortBy.equals("likes")) {
+            posts = postService.getAllOrderByWeekLikeCount(boardId);
+        }
+        else {
+            posts = postService.getByBoardIdOrderByViewCount(boardId);
+        }
+
+        return ResponseEntity.ok(posts);
+    }
 }
