@@ -59,6 +59,10 @@ public class Post {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // 업데이트 시간 갱신 필요없는 필드 변경시 사용
+    @Transient
+    private boolean refreshUpdatedAt;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -67,7 +71,11 @@ public class Post {
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        if (refreshUpdatedAt) {
+            updatedAt = LocalDateTime.now();
+        }
+
+        refreshUpdatedAt = true;
     }
 
     // Constructors
@@ -136,6 +144,7 @@ public class Post {
 
     public void setViewCount(Integer viewCount) {
         this.viewCount = viewCount;
+        refreshUpdatedAt = false;
     }
 
     public Integer getLikeCount() {
@@ -144,6 +153,7 @@ public class Post {
 
     public void setLikeCount(Integer likeCount) {
         this.likeCount = likeCount;
+        refreshUpdatedAt = false;
     }
 
     public Integer getDislikeCount() {
@@ -152,6 +162,7 @@ public class Post {
 
     public void setDislikeCount(Integer dislikeCount) {
         this.dislikeCount = dislikeCount;
+        refreshUpdatedAt = false;
     }
 
     public Integer getCommentCount() {
@@ -160,6 +171,7 @@ public class Post {
 
     public void setCommentCount(Integer commentCount) {
         this.commentCount = commentCount;
+        refreshUpdatedAt = false;
     }
 
     public Integer getScrapCount() {
@@ -168,6 +180,7 @@ public class Post {
 
     public void setScrapCount(Integer scrapCount) {
         this.scrapCount = scrapCount;
+        refreshUpdatedAt = false;
     }
 
     public Boolean getIsNotice() {
@@ -176,6 +189,7 @@ public class Post {
 
     public void setIsNotice(Boolean isNotice) {
         this.isNotice = isNotice;
+        refreshUpdatedAt = false;
     }
 
     public Boolean getIsBlinded() {
@@ -200,6 +214,7 @@ public class Post {
 
     public void setReportedCount(Integer reportedCount) {
         this.reportedCount = reportedCount;
+        refreshUpdatedAt = false;
     }
 
     public LocalDateTime getCreatedAt() {
