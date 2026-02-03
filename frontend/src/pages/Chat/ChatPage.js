@@ -124,7 +124,10 @@ function ChatPage() {
 
   const formatTime = (dateString) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
+    const [year, month, day, hour, min, sec] = String(dateString).split(',').map(Number);
+    const date = new Date(year, month - 1, day, hour, min, sec); // 자바스크립트 month가 0부터 시작이라 파싱해서 -1 해줘야함;;;;
+
+    console.log('converted :' + date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }));
     return date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
   };
 
@@ -176,7 +179,7 @@ function ChatPage() {
       <form className="chat-input-area" onSubmit={sendMessage}>
         <input
           type="text"
-          placeholder="メッセージを入力..."
+          placeholder="メッセージを入力...!"
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           className="chat-input"

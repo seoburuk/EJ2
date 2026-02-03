@@ -4,7 +4,13 @@ import com.ej2.dto.*;
 import com.ej2.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
 
 import javax.servlet.http.HttpSession;
 
@@ -34,6 +40,19 @@ public class AuthController {
             // セッションにユーザーIDを保存
             session.setAttribute("userId", response.getUser().getId());
             session.setAttribute("user", response.getUser());
+
+            // Spring Security SecurityContext에 인증 정보를 저장한다.
+            UsernamePasswordAuthenticationToken authToken = 
+                new UsernamePasswordAuthenticationToken(response.getUser().getId(), 
+                                                        null, 
+                                                        Collections.singletonList(new SimpleGrantedAuthority("USER")));
+
+            // Context에 설정
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            // 세션에 Context 저장
+            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(401).body(response);
@@ -48,7 +67,14 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public ResponseEntity<AuthResponse> logout(HttpSession session) {
-        session.invalidate();
+        // SecurityContext 초기화
+        SecurityContextHolder.clearContext();
+
+        if (session != null) {
+            session.removeAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+
+            session.invalidate();
+        }
         return ResponseEntity.ok(new AuthResponse(true, "ログアウトしました"));
     }
 

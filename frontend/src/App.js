@@ -27,6 +27,7 @@ function NavBar() {
   const [user, setUser] = useState(null);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     fetchBoards();
@@ -41,7 +42,7 @@ function NavBar() {
     return () => {
       window.removeEventListener('authChange', handleAuthChange);
     };
-  }, []);
+  }, [location]); // location 추가해서 페이지 이동시마다 확인하도록....
 
   // ユーザーのログイン状態を確認
   const checkUserLogin = () => {
@@ -54,10 +55,20 @@ function NavBar() {
   };
 
   // ログアウト処理
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    setUser(null);
-    navigate('/login');
+  const handleLogout = async () => {
+    // 로그아웃도 백엔드 요청 보내도록 수정함
+    try {
+      await axios.post('/api/auth/logout', {}, { withCredentials : true });
+
+      localStorage.removeItem('user');
+      setUser(null);
+      navigate('/login');
+    }
+    catch(err) {
+      localStorage.removeItem('user');
+      setUser(null);
+      navigate('/login');
+    }
   };
 
   useEffect(() => {

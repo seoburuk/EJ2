@@ -26,7 +26,11 @@ import java.util.Properties;
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages = "com.ej2.repository")
 @MapperScan(basePackages = "com.ej2.mapper")
+<<<<<<< HEAD
 @ComponentScan(basePackages = {"com.ej2.service", "com.ej2.repository", "com.ej2.config"})
+=======
+@ComponentScan(basePackages = {"com.ej2.service", "com.ej2.repository"})
+>>>>>>> bf5bb241 (ranking algorithm)
 @PropertySource("classpath:application.properties")
 public class RootConfig {
 
