@@ -48,6 +48,7 @@ function LoginPage() {
         navigate('/');
       } else {
         setError(response.data.message);
+        console.log(response.data.message); // 확인용 지울거
       }
     } catch (err) {
       if (err.response && err.response.data) {
