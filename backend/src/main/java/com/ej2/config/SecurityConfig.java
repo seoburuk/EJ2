@@ -25,7 +25,7 @@ public class SecurityConfig {
             .and()
             .authorizeHttpRequests(authz -> authz
                 .antMatchers(OPTIONS, "/**").permitAll() // cors용 option 허용
-                .antMatchers("/", "/resources/**").permitAll()  // 기본경로
+                .antMatchers("/", "/resources/**", "/api/auth/**").permitAll()  // 기본경로
                 //.antMatchers(GET, "/api/posts/**").permitAll()  // 로긴필요없는 api (get)
                 .antMatchers(POST, "/api/posts/**").authenticated()  // 로긴필요한 api (post)
                 //.antMatchers(PUT, "").authenticated() // 로긴필요 api (put)

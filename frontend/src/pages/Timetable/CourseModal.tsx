@@ -67,19 +67,19 @@ const CourseModal: React.FC<CourseModalProps> = ({
     console.log('📅 제출 시 daySchedules:', formData.daySchedules);
 
     if (!formData.courseName.trim()) {
-      alert('과목명을 입력해주세요');
+      alert('科目名を入力してください。');
       return;
     }
 
     if (formData.daySchedules.length === 0) {
-      alert('최소 하나의 요일을 선택해주세요');
+      alert('最低一つの曜日を選んでください。');
       return;
     }
 
     // 각 요일별 시간 검증
     for (const schedule of formData.daySchedules) {
       if (schedule.periodStart > schedule.periodEnd) {
-        alert(`${DAYS[schedule.day - 1]}요일: 시작 교시는 종료 교시보다 작아야 합니다`);
+        alert(`${DAYS[schedule.day - 1]}曜日: 開始時限は終了時限より前の値を選択してください。`);
         return;
       }
     }
@@ -114,7 +114,7 @@ const CourseModal: React.FC<CourseModalProps> = ({
           s.day === day ? { ...s, [field]: value } : s
         )
       };
-      console.log('📝 업데이트된 daySchedules:', updated.daySchedules);
+      console.log('📝 修正された daySchedules:', updated.daySchedules);
       return updated;
     });
   };
@@ -131,46 +131,46 @@ const CourseModal: React.FC<CourseModalProps> = ({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>{course ? '과목 수정' : '과목 추가'}</h2>
+          <h2>{course ? '科目修正' : '科目追加'}</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>과목명 *</label>
+            <label>科目名 *</label>
             <input
               type="text"
               value={formData.courseName}
               onChange={(e) => handleChange('courseName', e.target.value)}
-              placeholder="예: 자료구조와 알고리즘"
+              placeholder="例: 資料構造とアルゴリズム"
               required
             />
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label>교수님</label>
+              <label>教授</label>
               <input
                 type="text"
                 value={formData.professorName || ''}
                 onChange={(e) => handleChange('professorName', e.target.value)}
-                placeholder="예: 홍길동"
+                placeholder="例: 田中サイオ"
               />
             </div>
 
             <div className="form-group">
-              <label>강의실</label>
+              <label>講義室</label>
               <input
                 type="text"
                 value={formData.classroom || ''}
                 onChange={(e) => handleChange('classroom', e.target.value)}
-                placeholder="예: A101"
+                placeholder="例: A101"
               />
             </div>
           </div>
 
           <div className="form-group">
-            <label>요일 및 시간 설정 * (복수 선택 가능)</label>
+            <label>曜日及び時間設定 * (複数選択可能)</label>
             <div className="days-selector">
               {DAYS.map((day, index) => {
                 const dayNumber = index + 1;
@@ -194,7 +194,7 @@ const CourseModal: React.FC<CourseModalProps> = ({
               {formData.daySchedules.map(schedule => (
                 <div key={schedule.day} className="day-schedule-row">
                   <div className="day-label">
-                    {DAYS[schedule.day - 1]}요일
+                    {DAYS[schedule.day - 1]}曜日
                   </div>
                   <div className="time-selectors">
                     <select
@@ -202,7 +202,7 @@ const CourseModal: React.FC<CourseModalProps> = ({
                       onChange={(e) => updateDaySchedule(schedule.day, 'periodStart', Number(e.target.value))}
                     >
                       {[1, 2, 3, 4, 5, 6, 7].map(p => (
-                        <option key={p} value={p}>{p}교시</option>
+                        <option key={p} value={p}>{p}時限</option>
                       ))}
                     </select>
                     <span className="time-separator">~</span>
@@ -211,7 +211,7 @@ const CourseModal: React.FC<CourseModalProps> = ({
                       onChange={(e) => updateDaySchedule(schedule.day, 'periodEnd', Number(e.target.value))}
                     >
                       {[1, 2, 3, 4, 5, 6, 7].map(p => (
-                        <option key={p} value={p}>{p}교시</option>
+                        <option key={p} value={p}>{p}時限</option>
                       ))}
                     </select>
                   </div>
@@ -222,7 +222,7 @@ const CourseModal: React.FC<CourseModalProps> = ({
 
           <div className="form-row">
             <div className="form-group">
-              <label>학점</label>
+              <label>単位</label>
               <input
                 type="number"
                 step="0.5"
@@ -235,7 +235,7 @@ const CourseModal: React.FC<CourseModalProps> = ({
           </div>
 
           <div className="form-group">
-            <label>색상</label>
+            <label>カラー</label>
             <div className="color-picker">
               {COURSE_COLORS.map(color => (
                 <button
@@ -251,11 +251,11 @@ const CourseModal: React.FC<CourseModalProps> = ({
 
           {/*
           <div className="form-group">
-            <label>메모</label>
+            <label>メモ</label>
             <textarea
               value={formData.memo || ''}
               onChange={(e) => handleChange('memo', e.target.value)}
-              placeholder="예: 중간고사 있음"
+              placeholder="例: 中間テストあり"
               rows={3}
             />
           </div>
@@ -264,14 +264,14 @@ const CourseModal: React.FC<CourseModalProps> = ({
           <div className="modal-actions">
             {onDelete && (
               <button type="button" className="delete-button" onClick={onDelete}>
-                삭제
+                削除
               </button>
             )}
             <button type="button" className="cancel-button" onClick={onClose}>
-              취소
+              キャンセル
             </button>
             <button type="submit" className="save-button">
-              저장
+              保存
             </button>
           </div>
         </form>

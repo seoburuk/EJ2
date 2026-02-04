@@ -44,6 +44,11 @@ public class CommentService {
         return convertToCommentDTOList(comments);
     }
 
+    public List<CommentDTO> getCommentsByPostIdDesc(Long postId) {
+        List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
+        return convertToCommentDTOList(comments);
+    }
+
     public List<CommentDTO> getTopLevelComments(Long postId) {
         List<Comment> comments = commentRepository.findByPostIdAndParentIdIsNullOrderByCreatedAtAsc(postId);
         return convertToCommentDTOList(comments);
@@ -51,6 +56,11 @@ public class CommentService {
 
     public List<CommentDTO> getReplies(Long parentId) {
         List<Comment> comments = commentRepository.findByParentIdOrderByCreatedAtAsc(parentId);
+        return convertToCommentDTOList(comments);
+    }
+
+    public List<CommentDTO> getRepliesDesc(Long parentId) {
+        List<Comment> comments = commentRepository.findByParentIdOrderByCreatedAtDesc(parentId);
         return convertToCommentDTOList(comments);
     }
 
@@ -105,6 +115,9 @@ public class CommentService {
                 );
                 comment.setAnonymousId(anonymousId);
             }
+
+            post.setCommentCount(post.getCommentCount() + 1);
+            postRepository.save(post);
         }
 
         return commentRepository.save(comment);
@@ -124,6 +137,11 @@ public class CommentService {
                 .orElseThrow(() -> new RuntimeException("Comment not found with id: " + id));
         comment.setIsDeleted(true);
         comment.setContent("削除されたコメントです。");
+
+        Optional<Post> postOpt = postRepository.findById(comment.getPostId());
+        Post post = postOpt.get();
+        post.setCommentCount(post.getCommentCount() - 1);
+        postRepository.save(post);
         commentRepository.save(comment);
     }
 
