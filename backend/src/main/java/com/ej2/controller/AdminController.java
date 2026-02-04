@@ -213,4 +213,198 @@ public class AdminController {
             return ResponseEntity.badRequest().body(error);
         }
     }
+
+    // ==================== 報告管理API ====================
+
+    @GetMapping("/reports/stats")
+    public ResponseEntity<?> getReportStats(HttpSession session) {
+        ResponseEntity<?> accessCheck = checkAdminAccess(session);
+        if (accessCheck != null) return accessCheck;
+
+        try {
+            return ResponseEntity.ok(adminService.getReportStats());
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", "統計の取得に失敗しました");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @GetMapping("/reports")
+    public ResponseEntity<?> searchReports(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String reportType,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            HttpSession session) {
+        ResponseEntity<?> accessCheck = checkAdminAccess(session);
+        if (accessCheck != null) return accessCheck;
+
+        try {
+            Map<String, Object> result = adminService.searchReports(
+                    status, reportType, sortBy, sortOrder, page, size);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", "報告一覧の取得に失敗しました");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @GetMapping("/reports/{reportId}")
+    public ResponseEntity<?> getReportDetail(
+            @PathVariable Long reportId,
+            HttpSession session) {
+        ResponseEntity<?> accessCheck = checkAdminAccess(session);
+        if (accessCheck != null) return accessCheck;
+
+        try {
+            return ResponseEntity.ok(adminService.getReportDetail(reportId));
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", "報告詳細の取得に失敗しました");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @PutMapping("/reports/{reportId}/status")
+    public ResponseEntity<?> updateReportStatus(
+            @PathVariable Long reportId,
+            @RequestBody Map<String, String> request,
+            HttpSession session) {
+        ResponseEntity<?> accessCheck = checkAdminAccess(session);
+        if (accessCheck != null) return accessCheck;
+
+        try {
+            User currentUser = (User) session.getAttribute("user");
+            String status = request.get("status");
+            String adminNote = request.get("adminNote");
+
+            adminService.updateReportStatus(reportId, status, adminNote, currentUser.getId());
+
+            Map<String, Object> response = new HashMap<String, Object>();
+            response.put("success", true);
+            response.put("message", "報告のステータスが更新されました");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", "ステータス更新に失敗しました");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @PostMapping("/reports/{reportId}/actions")
+    public ResponseEntity<?> takeModerationAction(
+            @PathVariable Long reportId,
+            @RequestBody Map<String, String> request,
+            HttpSession session) {
+        ResponseEntity<?> accessCheck = checkAdminAccess(session);
+        if (accessCheck != null) return accessCheck;
+
+        try {
+            User currentUser = (User) session.getAttribute("user");
+            String action = request.get("action");
+            String adminNote = request.get("adminNote");
+
+            adminService.takeModerationAction(reportId, action, adminNote, currentUser.getId());
+
+            Map<String, Object> response = new HashMap<String, Object>();
+            response.put("success", true);
+            response.put("message", "モデレーションアクションが実行されました");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", "アクション実行に失敗しました");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    // ==================== ユーザー停止API ====================
+
+    @PostMapping("/users/{userId}/suspend")
+    public ResponseEntity<?> suspendUser(
+            @PathVariable Long userId,
+            @RequestBody Map<String, String> request,
+            HttpSession session) {
+        ResponseEntity<?> accessCheck = checkAdminAccess(session);
+        if (accessCheck != null) return accessCheck;
+
+        try {
+            String duration = request.get("duration");
+            String reason = request.get("reason");
+
+            if (reason == null || reason.trim().isEmpty()) {
+                Map<String, Object> error = new HashMap<String, Object>();
+                error.put("success", false);
+                error.put("message", "停止理由は必須です");
+                return ResponseEntity.badRequest().body(error);
+            }
+
+            adminService.suspendUser(userId, duration, reason);
+
+            Map<String, Object> response = new HashMap<String, Object>();
+            response.put("success", true);
+            response.put("message", "ユーザーが停止されました");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", "ユーザー停止に失敗しました");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @PostMapping("/users/{userId}/unsuspend")
+    public ResponseEntity<?> unsuspendUser(
+            @PathVariable Long userId,
+            HttpSession session) {
+        ResponseEntity<?> accessCheck = checkAdminAccess(session);
+        if (accessCheck != null) return accessCheck;
+
+        try {
+            adminService.unsuspendUser(userId);
+
+            Map<String, Object> response = new HashMap<String, Object>();
+            response.put("success", true);
+            response.put("message", "ユーザーの停止が解除されました");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", "停止解除に失敗しました");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
 }

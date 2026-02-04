@@ -249,6 +249,7 @@ const CourseModal: React.FC<CourseModalProps> = ({
             </div>
           </div>
 
+          {/*
           <div className="form-group">
             <label>メモ</label>
             <textarea
@@ -258,6 +259,7 @@ const CourseModal: React.FC<CourseModalProps> = ({
               rows={3}
             />
           </div>
+          */}
 
           <div className="modal-actions">
             {onDelete && (

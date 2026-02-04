@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ej2.mapper.ReportMapper">
+
+    <!-- Result Maps -->
+    <resultMap id="ReportStatsResultMap" type="com.ej2.dto.ReportStatsDTO">
+        <result property="totalReports" column="totalReports"/>
+        <result property="pendingReports" column="pendingReports"/>
+        <result property="reviewingReports" column="reviewingReports"/>
+        <result property="resolvedToday" column="resolvedToday"/>
+        <result property="dismissedToday" column="dismissedToday"/>
+    </resultMap>
+
+    <resultMap id="ReportResultMap" type="com.ej2.dto.ReportDTO">
+        <id property="id" column="id"/>
+        <result property="reportType" column="reportType"/>
+        <result property="entityId" column="entityId"/>
+        <result property="reporterId" column="reporterId"/>
+        <result property="reporterName" column="reporterName"/>
+        <result property="reason" column="reason"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="createdAt"/>
+        <result property="updatedAt" column="updatedAt"/>
+    </resultMap>
+
+    <resultMap id="ReportDetailResultMap" type="com.ej2.dto.ReportDetailDTO">
+        <id property="id" column="id"/>
+        <result property="reportType" column="reportType"/>
+        <result property="entityId" column="entityId"/>
+        <result property="reporterId" column="reporterId"/>
+        <result property="reporterName" column="reporterName"/>
+        <result property="reporterEmail" column="reporterEmail"/>
+        <result property="reason" column="reason"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="adminNote" column="adminNote"/>
+        <result property="resolvedBy" column="resolvedBy"/>
+        <result property="resolvedByName" column="resolvedByName"/>
+        <result property="resolvedAt" column="resolvedAt"/>
+        <result property="resolutionAction" column="resolutionAction"/>
+        <result property="createdAt" column="createdAt"/>
+        <result property="updatedAt" column="updatedAt"/>
+        <result property="entityTitle" column="entityTitle"/>
+        <result property="entityContent" column="entityContent"/>
+        <result property="entityAuthorName" column="entityAuthorName"/>
+        <result property="entityAuthorId" column="entityAuthorId"/>
+        <result property="entityCreatedAt" column="entityCreatedAt"/>
+    </resultMap>
+
+    <!-- Query 1: Dashboard Statistics -->
+    <select id="selectReportStats" resultMap="ReportStatsResultMap">
+        SELECT
+            COUNT(*) AS totalReports,
+            SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END) AS pendingReports,
+            SUM(CASE WHEN status = 'REVIEWING' THEN 1 ELSE 0 END) AS reviewingReports,
+            SUM(CASE WHEN status = 'RESOLVED' AND DATE(resolved_at) = CURDATE() THEN 1 ELSE 0 END) AS resolvedToday,
+            SUM(CASE WHEN status = 'DISMISSED' AND DATE(resolved_at) = CURDATE() THEN 1 ELSE 0 END) AS dismissedToday
+        FROM reports
+    </select>
+
+    <!-- Query 2: Dynamic Search with Filters and Sorting -->
+    <select id="selectReports" resultMap="ReportResultMap">
+        SELECT
+            r.id,
+            r.report_type AS reportType,
+            r.entity_id AS entityId,
+            r.reporter_id AS reporterId,
+            reporter.name AS reporterName,
+            r.reason,
+            r.description,
+            r.status,
+            r.created_at AS createdAt,
+            r.updated_at AS updatedAt
+        FROM reports r
+        INNER JOIN users reporter ON r.reporter_id = reporter.id
+        <where>
+            <if test="criteria.status != null and criteria.status != ''">
+                AND r.status = #{criteria.status}
+            </if>
+            <if test="criteria.reportType != null and criteria.reportType != ''">
+                AND r.report_type = #{criteria.reportType}
+            </if>
+        </where>
+        <choose>
+            <when test="criteria.sortBy == 'status'">
+                ORDER BY r.status
+            </when>
+            <when test="criteria.sortBy == 'type'">
+                ORDER BY r.report_type
+            </when>
+            <otherwise>
+                ORDER BY r.created_at DESC
+            </otherwise>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- Query 3: Count Reports for Pagination -->
+    <select id="countReports" resultType="int">
+        SELECT COUNT(*)
+        FROM reports r
+        <where>
+            <if test="criteria.status != null and criteria.status != ''">
+                AND r.status = #{criteria.status}
+            </if>
+            <if test="criteria.reportType != null and criteria.reportType != ''">
+                AND r.report_type = #{criteria.reportType}
+            </if>
+        </where>
+    </select>
+
+    <!-- Query 4: Report Detail with Polymorphic Entity Context -->
+    <select id="selectReportDetail" resultMap="ReportDetailResultMap">
+        SELECT
+            r.id,
+            r.report_type AS reportType,
+            r.entity_id AS entityId,
+            r.reporter_id AS reporterId,
+            reporter.name AS reporterName,
+            reporter.email AS reporterEmail,
+            r.reason,
+            r.description,
+            r.status,
+            r.admin_note AS adminNote,
+            r.resolved_by AS resolvedBy,
+            resolver.name AS resolvedByName,
+            r.resolved_at AS resolvedAt,
+            r.resolution_action AS resolutionAction,
+            r.created_at AS createdAt,
+            r.updated_at AS updatedAt,
+
+            -- Polymorphic entity context with CASE statements
+            CASE
+                WHEN r.report_type = 'POST' THEN p.title
+                WHEN r.report_type = 'COMMENT' THEN CONCAT('Comment on: ', post_for_comment.title)
+                WHEN r.report_type = 'USER' THEN reported_user.name
+            END AS entityTitle,
+
+            CASE
+                WHEN r.report_type = 'POST' THEN p.content
+                WHEN r.report_type = 'COMMENT' THEN c.content
+                WHEN r.report_type = 'USER' THEN reported_user.email
+            END AS entityContent,
+
+            CASE
+                WHEN r.report_type = 'POST' THEN post_author.name
+                WHEN r.report_type = 'COMMENT' THEN comment_author.name
+                WHEN r.report_type = 'USER' THEN reported_user.name
+            END AS entityAuthorName,
+
+            CASE
+                WHEN r.report_type = 'POST' THEN p.user_id
+                WHEN r.report_type = 'COMMENT' THEN c.user_id
+                WHEN r.report_type = 'USER' THEN r.entity_id
+            END AS entityAuthorId,
+
+            CASE
+                WHEN r.report_type = 'POST' THEN p.created_at
+                WHEN r.report_type = 'COMMENT' THEN c.created_at
+                WHEN r.report_type = 'USER' THEN reported_user.created_at
+            END AS entityCreatedAt
+
+        FROM reports r
+        INNER JOIN users reporter ON r.reporter_id = reporter.id
+        LEFT JOIN users resolver ON r.resolved_by = resolver.id
+
+        -- JOIN for POST reports
+        LEFT JOIN posts p ON r.report_type = 'POST' AND r.entity_id = p.id
+        LEFT JOIN users post_author ON p.user_id = post_author.id
+
+        -- JOIN for COMMENT reports
+        LEFT JOIN comments c ON r.report_type = 'COMMENT' AND r.entity_id = c.id
+        LEFT JOIN users comment_author ON c.user_id = comment_author.id
+        LEFT JOIN posts post_for_comment ON c.post_id = post_for_comment.id
+
+        -- JOIN for USER reports
+        LEFT JOIN users reported_user ON r.report_type = 'USER' AND r.entity_id = reported_user.id
+
+        WHERE r.id = #{reportId}
+    </select>
+
+</mapper>

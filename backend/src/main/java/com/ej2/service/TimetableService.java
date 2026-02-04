@@ -94,7 +94,7 @@ public class TimetableService {
         existingCourse.setPeriodEnd(courseData.getPeriodEnd());
         existingCourse.setCredits(courseData.getCredits());
         existingCourse.setColorCode(courseData.getColorCode());
-        existingCourse.setMemo(courseData.getMemo());
+        //existingCourse.setMemo(courseData.getMemo());
 
         return courseRepository.save(existingCourse);
     }

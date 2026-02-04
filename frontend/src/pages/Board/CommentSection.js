@@ -12,7 +12,6 @@ function CommentSection({ postId, boardId, isAnonymous }) {
   const [editContent, setEditContent] = useState('');
   const [likedComments, setLikedComments] = useState({});
 
-  // 現在のユーザー情報を取得
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
@@ -24,8 +23,6 @@ function CommentSection({ postId, boardId, isAnonymous }) {
       const response = await axios.get(`/api/comments/post/${postId}`);
       setComments(response.data);
 
-      // Check like status for each comment
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
       const likeStatuses = {};
       for (const comment of response.data) {
         try {
@@ -38,7 +35,6 @@ function CommentSection({ postId, boardId, isAnonymous }) {
         }
       }
       setLikedComments(likeStatuses);
-
       setLoading(false);
     } catch (error) {
       console.error('コメントの読み込みに失敗しました:', error);
@@ -49,15 +45,10 @@ function CommentSection({ postId, boardId, isAnonymous }) {
 
   const handleSubmitComment = async (e) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
-
-    // Get current user
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!user.id) {
-      alert('ログインが必要です');
+    if (!newComment.trim() || !user.id) {
+      if (!user.id) alert('ログインが必要です');
       return;
     }
-
     try {
       const commentData = {
         postId: parseInt(postId),
@@ -65,27 +56,20 @@ function CommentSection({ postId, boardId, isAnonymous }) {
         content: newComment,
         anonymousId: isAnonymous ? `匿名${Math.floor(Math.random() * 1000)}` : null
       };
-
       await axios.post('/api/comments', commentData);
       setNewComment('');
       fetchComments();
     } catch (error) {
-      console.error('コメントの作成に失敗しました:', error);
       alert('コメントの作成に失敗しました。');
     }
   };
 
   const handleSubmitReply = async (e, parentId) => {
     e.preventDefault();
-    if (!replyContent.trim()) return;
-
-    // Get current user
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!user.id) {
-      alert('ログインが必要です');
+    if (!replyContent.trim() || !user.id) {
+      if (!user.id) alert('ログインが必要です');
       return;
     }
-
     try {
       const replyData = {
         postId: parseInt(postId),
@@ -94,38 +78,26 @@ function CommentSection({ postId, boardId, isAnonymous }) {
         content: replyContent,
         anonymousId: isAnonymous ? `匿名${Math.floor(Math.random() * 1000)}` : null
       };
-
       await axios.post('/api/comments', replyData);
       setReplyContent('');
       setReplyTo(null);
       fetchComments();
     } catch (error) {
-      console.error('返信の作成に失敗しました:', error);
       alert('返信の作成に失敗しました。');
     }
   };
 
   const handleLikeComment = async (commentId) => {
     try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
       const response = await axios.post(`/api/comments/${commentId}/like`, null, {
         params: { userId: user.id || null }
       });
-
-      // Update liked state locally
-      setLikedComments(prev => ({
-        ...prev,
-        [commentId]: response.data.liked
-      }));
-
-      // Update comment like count locally
+      setLikedComments(prev => ({ ...prev, [commentId]: response.data.liked }));
       setComments(prev => prev.map(comment => {
         if (comment.id === commentId) {
           return {
             ...comment,
-            likeCount: response.data.liked
-              ? (comment.likeCount || 0) + 1
-              : Math.max(0, (comment.likeCount || 0) - 1)
+            likeCount: response.data.liked ? (comment.likeCount || 0) + 1 : Math.max(0, (comment.likeCount || 0) - 1)
           };
         }
         return comment;
@@ -136,74 +108,31 @@ function CommentSection({ postId, boardId, isAnonymous }) {
   };
 
   const handleDeleteComment = async (commentId) => {
-    if (!window.confirm('コメントを削除しますか？')) return;
-
-    if (!user.id) {
-      alert('ログインが必要です');
-      return;
-    }
-
+    if (!window.confirm('コメントを削除しますか？') || !user.id) return;
     try {
       await axios.delete(`/api/comments/${commentId}?userId=${user.id}`);
       fetchComments();
     } catch (error) {
-      console.error('コメントの削除に失敗しました:', error);
-      if (error.response && error.response.status === 403) {
-        alert('自分のコメントのみ削除できます。');
-      } else {
-        alert('コメントの削除に失敗しました。');
-      }
+      alert('コメントの削除に失敗しました。');
     }
   };
 
-  // コメント編集開始
-  const handleStartEdit = (comment) => {
-    setEditingId(comment.id);
-    setEditContent(comment.content);
-  };
-
-  // コメント編集キャンセル
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setEditContent('');
-  };
-
-  // コメント更新を保存
   const handleSaveEdit = async (commentId) => {
-    if (!editContent.trim()) return;
-
-    if (!user.id) {
-      alert('ログインが必要です');
-      return;
-    }
-
+    if (!editContent.trim() || !user.id) return;
     try {
-      await axios.put(`/api/comments/${commentId}?userId=${user.id}`, {
-        content: editContent
-      });
+      await axios.put(`/api/comments/${commentId}?userId=${user.id}`, { content: editContent });
       setEditingId(null);
       setEditContent('');
       fetchComments();
     } catch (error) {
-      console.error('コメントの更新に失敗しました:', error);
-      if (error.response && error.response.status === 403) {
-        alert('自分のコメントのみ編集できます。');
-      } else {
-        alert('コメントの更新に失敗しました。');
-      }
+      alert('コメントの更新に失敗しました。');
     }
-  };
-
-  // 本人のコメントかどうかを確認
-  const isOwnComment = (comment) => {
-    return user.id && comment.userId === user.id;
   };
 
   const getTimeAgo = (dateString) => {
     const now = new Date();
     const past = new Date(dateString);
     const diffInMinutes = Math.floor((now - past) / (1000 * 60));
-
     if (diffInMinutes < 1) return 'たった今';
     if (diffInMinutes < 60) return `${diffInMinutes}分前`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}時間前`;
@@ -214,9 +143,7 @@ function CommentSection({ postId, boardId, isAnonymous }) {
   const topLevelComments = comments.filter(c => !c.parentId);
   const getReplies = (parentId) => comments.filter(c => c.parentId === parentId);
 
-  if (loading) {
-    return <div className="comments-loading">コメントを読み込み中...</div>;
-  }
+  if (loading) return <div className="comments-loading">コメントを読み込み中...</div>;
 
   return (
     <div className="comments-section">
@@ -231,16 +158,12 @@ function CommentSection({ postId, boardId, isAnonymous }) {
           placeholder="コメントを入力してください..."
           rows="3"
         />
-        <button type="submit" className="submit-comment-btn">
-          コメントを投稿
-        </button>
+        <button type="submit" className="submit-comment-btn">コメントを投稿</button>
       </form>
 
       <div className="comments-list">
         {topLevelComments.length === 0 ? (
-          <div className="no-comments">
-            最初のコメントを書いてみましょう！
-          </div>
+          <div className="no-comments">最初のコメントを書いてみましょう！</div>
         ) : (
           topLevelComments.map(comment => (
             <div key={comment.id} className="comment-item">
@@ -248,73 +171,48 @@ function CommentSection({ postId, boardId, isAnonymous }) {
                 <span className="comment-author">
                   {isAnonymous ? comment.anonymousId || '匿名' : (comment.authorNickname || 'Unknown User')}
                 </span>
-                <span className="comment-time">{getTimeAgo(comment.createdAt)}</span>
+                <div>
+                  <span className="comment-time">{getTimeAgo(comment.createdAt)}</span>
+                  {/* 수정됨 표시 로직 */}
+                  {comment.updatedAt && comment.updatedAt !== comment.createdAt && (
+                    <span className="comment-time">（編集済み）</span>
+                  )}
+                </div>
               </div>
 
               {editingId === comment.id ? (
                 <div className="comment-edit-form">
-                  <textarea
-                    value={editContent}
-                    onChange={(e) => setEditContent(e.target.value)}
-                    rows="3"
-                  />
+                  <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} rows="3" />
                   <div className="edit-actions">
-                    <button onClick={handleCancelEdit}>キャンセル</button>
+                    <button onClick={() => setEditingId(null)}>キャンセル</button>
                     <button onClick={() => handleSaveEdit(comment.id)}>保存</button>
                   </div>
                 </div>
               ) : (
-                <div className="comment-content">
-                  {comment.content}
-                </div>
+                <div className="comment-content">{comment.content}</div>
               )}
 
               <div className="comment-actions">
-                <button
-                  className={`comment-action-btn ${likedComments[comment.id] ? 'liked' : ''}`}
-                  onClick={() => handleLikeComment(comment.id)}
-                >
-                  {likedComments[comment.id] ? '👍' : '👍'} {comment.likeCount || 0}
+                <button className={`comment-action-btn ${likedComments[comment.id] ? 'liked' : ''}`} onClick={() => handleLikeComment(comment.id)}>
+                  👍 {comment.likeCount || 0}
                 </button>
-                <button
-                  className="comment-action-btn"
-                  onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
-                >
+                <button className="comment-action-btn" onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}>
                   💬 返信
                 </button>
-                {isOwnComment(comment) && !comment.isDeleted && (
+                {user.id && comment.userId === user.id && !comment.isDeleted && (
                   <>
-                    <button
-                      className="comment-action-btn edit"
-                      onClick={() => handleStartEdit(comment)}
-                    >
-                      ✏️ 編集
-                    </button>
-                    <button
-                      className="comment-action-btn delete"
-                      onClick={() => handleDeleteComment(comment.id)}
-                    >
-                      🗑️ 削除
-                    </button>
+                    <button className="comment-action-btn edit" onClick={() => { setEditingId(comment.id); setEditContent(comment.content); }}>✏️ 編集</button>
+                    <button className="comment-action-btn delete" onClick={() => handleDeleteComment(comment.id)}>🗑️ 削除</button>
                   </>
                 )}
               </div>
 
+              {/* 답글 입력창 및 답글 리스트 */}
               {replyTo === comment.id && (
-                <form
-                  className="reply-form"
-                  onSubmit={(e) => handleSubmitReply(e, comment.id)}
-                >
-                  <textarea
-                    value={replyContent}
-                    onChange={(e) => setReplyContent(e.target.value)}
-                    placeholder="返信を入力してください..."
-                    rows="2"
-                  />
+                <form className="reply-form" onSubmit={(e) => handleSubmitReply(e, comment.id)}>
+                  <textarea value={replyContent} onChange={(e) => setReplyContent(e.target.value)} placeholder="返信を入力してください..." rows="2" />
                   <div className="reply-actions">
-                    <button type="button" onClick={() => setReplyTo(null)}>
-                      キャンセル
-                    </button>
+                    <button type="button" onClick={() => setReplyTo(null)}>キャンセル</button>
                     <button type="submit">返信を投稿</button>
                   </div>
                 </form>
@@ -326,48 +224,33 @@ function CommentSection({ postId, boardId, isAnonymous }) {
                     <span className="comment-author">
                       {isAnonymous ? reply.anonymousId || '匿名' : (reply.authorNickname || 'Unknown User')}
                     </span>
-                    <span className="comment-time">{getTimeAgo(reply.createdAt)}</span>
+                    <div>
+                      <span className="comment-time">{getTimeAgo(reply.createdAt)}</span>
+                      {/* 답글 수정됨 표시 로직 */}
+                      {reply.updatedAt && reply.updatedAt !== reply.createdAt && (
+                        <span className="comment-time">（編集済み）</span>
+                      )}
+                    </div>
                   </div>
-
                   {editingId === reply.id ? (
                     <div className="comment-edit-form">
-                      <textarea
-                        value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        rows="2"
-                      />
+                      <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} rows="2" />
                       <div className="edit-actions">
-                        <button onClick={handleCancelEdit}>キャンセル</button>
+                        <button onClick={() => setEditingId(null)}>キャンセル</button>
                         <button onClick={() => handleSaveEdit(reply.id)}>保存</button>
                       </div>
                     </div>
                   ) : (
-                    <div className="comment-content">
-                      {reply.content}
-                    </div>
+                    <div className="comment-content">{reply.content}</div>
                   )}
-
                   <div className="comment-actions">
-                    <button
-                      className={`comment-action-btn ${likedComments[reply.id] ? 'liked' : ''}`}
-                      onClick={() => handleLikeComment(reply.id)}
-                    >
-                      {likedComments[reply.id] ? '👍' : '👍'} {reply.likeCount || 0}
+                    <button className={`comment-action-btn ${likedComments[reply.id] ? 'liked' : ''}`} onClick={() => handleLikeComment(reply.id)}>
+                      👍 {reply.likeCount || 0}
                     </button>
-                    {isOwnComment(reply) && !reply.isDeleted && (
+                    {user.id && reply.userId === user.id && !reply.isDeleted && (
                       <>
-                        <button
-                          className="comment-action-btn edit"
-                          onClick={() => handleStartEdit(reply)}
-                        >
-                          ✏️ 編集
-                        </button>
-                        <button
-                          className="comment-action-btn delete"
-                          onClick={() => handleDeleteComment(reply.id)}
-                        >
-                          🗑️ 削除
-                        </button>
+                        <button className="comment-action-btn edit" onClick={() => { setEditingId(reply.id); setEditContent(reply.content); }}>✏️ 編集</button>
+                        <button className="comment-action-btn delete" onClick={() => handleDeleteComment(reply.id)}>🗑️ 削除</button>
                       </>
                     )}
                   </div>

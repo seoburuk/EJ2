@@ -5,7 +5,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Legend
 } from 'recharts';
-import { FiUsers, FiShield, FiLayout, FiFileText, FiActivity, FiSettings } from 'react-icons/fi';
+import { FiUsers, FiShield, FiLayout, FiFileText, FiActivity, FiSettings, FiAlertTriangle } from 'react-icons/fi';
 import './AdminPages.css';
 
 // カウントアップアニメーション用カスタムフック
@@ -75,6 +75,7 @@ function AdminPage() {
   const [weeklyData, setWeeklyData] = useState([]);
   const [boardStats, setBoardStats] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [reportStats, setReportStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -99,17 +100,19 @@ function AdminPage() {
   // データ取得
   const fetchDashboardData = useCallback(async () => {
     try {
-      const [statsRes, weeklyRes, activityRes, boardStatsRes] = await Promise.all([
+      const [statsRes, weeklyRes, activityRes, boardStatsRes, reportStatsRes] = await Promise.all([
         axios.get('/api/admin/dashboard', { withCredentials: true }),
         axios.get('/api/admin/dashboard/weekly', { withCredentials: true }),
         axios.get('/api/admin/dashboard/activity', { withCredentials: true }),
-        axios.get('/api/admin/dashboard/board-stats', { withCredentials: true })
+        axios.get('/api/admin/dashboard/board-stats', { withCredentials: true }),
+        axios.get('http://localhost:8080/api/admin/reports/stats', { withCredentials: true })
       ]);
 
       setStats(statsRes.data);
       setWeeklyData(weeklyRes.data);
       setActivities(activityRes.data);
       setBoardStats(boardStatsRes.data);
+      setReportStats(reportStatsRes.data);
       setLoading(false);
     } catch (err) {
       console.error('Dashboard data fetch error:', err);
@@ -203,6 +206,14 @@ function AdminPage() {
             trend={stats?.newPostsThisWeek}
             gradient="linear-gradient(135deg, #90a4ae 0%, #78909c 100%)"
           />
+          {reportStats && (
+            <StatCard
+              icon={FiAlertTriangle}
+              title="保留中の報告"
+              value={reportStats.pendingReports}
+              gradient="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+            />
+          )}
         </div>
       </section>
 
@@ -337,6 +348,11 @@ function AdminPage() {
               <Link to="/admin/boards" className="quick-menu-item">
                 <FiLayout />
                 <span>掲示板管理</span>
+                <span className="menu-arrow">→</span>
+              </Link>
+              <Link to="/admin/reports" className="quick-menu-item">
+                <FiAlertTriangle />
+                <span>報告管理</span>
                 <span className="menu-arrow">→</span>
               </Link>
             </div>

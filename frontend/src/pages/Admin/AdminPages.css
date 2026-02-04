@@ -891,3 +891,355 @@
 .nav-admin:hover {
   color: #fda085 !important;
 }
+
+/* ==================== 報告管理ページ ==================== */
+
+.report-type-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+}
+
+.detail-section {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.detail-section h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--admin-dark);
+  font-size: 16px;
+}
+
+.detail-section p {
+  margin: 8px 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.detail-section p strong {
+  color: var(--admin-dark);
+  font-weight: 600;
+}
+
+.admin-note-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.admin-note-input:focus {
+  outline: none;
+  border-color: var(--admin-primary);
+}
+
+.modal-actions {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.modal-actions h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--admin-dark);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.action-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-button.view {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.action-button.view:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.action-button.reviewing {
+  background: #3b82f6;
+  color: white;
+}
+
+.action-button.reviewing:hover {
+  background: #2563eb;
+}
+
+.action-button.dismissed {
+  background: #6b7280;
+  color: white;
+}
+
+.action-button.dismissed:hover {
+  background: #4b5563;
+}
+
+.action-button.warning {
+  background: #f59e0b;
+  color: white;
+}
+
+.action-button.warning:hover {
+  background: #d97706;
+}
+
+.action-button.danger {
+  background: #ef4444;
+  color: white;
+}
+
+.action-button.danger:hover {
+  background: #dc2626;
+}
+
+.action-button.info {
+  background: #8b5cf6;
+  color: white;
+}
+
+.action-button.info:hover {
+  background: #7c3aed;
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.close-button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  background: #e5e7eb;
+  color: var(--admin-dark);
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.close-button:hover {
+  background: #d1d5db;
+}
+
+.filter-section {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-dark);
+}
+
+.filter-group select {
+  padding: 10px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.filter-group select:focus {
+  outline: none;
+  border-color: var(--admin-primary);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  padding: 20px;
+}
+
+.pagination button {
+  padding: 10px 20px;
+  background: var(--admin-primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  color: var(--admin-dark);
+  font-weight: 500;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  color: var(--admin-dark);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: #f8fafc;
+  border-color: var(--admin-primary);
+  color: var(--admin-primary);
+}
+
+/* ==================== ユーザー管理ページ ==================== */
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+}
+
+.status-badge.active {
+  background: #10b981;
+}
+
+.status-badge.suspended {
+  background: #f59e0b;
+}
+
+.status-badge.banned {
+  background: #ef4444;
+}
+
+.action-buttons-group {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-warning {
+  background: #f59e0b;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-warning:hover {
+  background: #d97706;
+}
+
+.btn-success {
+  background: #10b981;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+.suspend-duration-select,
+.suspend-reason-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.suspend-duration-select:focus,
+.suspend-reason-input:focus {
+  outline: none;
+  border-color: #f59e0b;
+}
+
+.suspend-reason-input {
+  resize: vertical;
+}
+
+.modal-description {
+  color: #64748b;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
