@@ -29,7 +29,7 @@ export interface TimetableCourse {
   daySchedules: DaySchedule[];  // [{day: 1, periodStart: 1, periodEnd: 3}, {day: 3, periodStart: 1, periodEnd: 3}]
   credits?: number;
   colorCode?: string;
-  memo?: string;
+  //memo?: string;
 }
 
 export const DAYS = ['月', '火', '水', '木', '金'] as const;

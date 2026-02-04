@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS timetable_courses (
     period_end INT NOT NULL COMMENT '1-7',
     credits DOUBLE,
     color_code VARCHAR(7) DEFAULT '#FFB3BA',
-    memo VARCHAR(500),
+--     memo VARCHAR(500),
     FOREIGN KEY (timetable_id) REFERENCES timetables(timetable_id) ON DELETE CASCADE,
     INDEX idx_timetable_id (timetable_id),
     INDEX idx_day_period (day_of_week, period_start, period_end)

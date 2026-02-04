@@ -176,9 +176,9 @@ public class TimetableController {
             } else {
                 course.setColorCode("#3b82f6");
             }
-            if (requestData.get("memo") != null) {
-                course.setMemo((String) requestData.get("memo"));
-            }
+//            if (requestData.get("memo") != null) {
+//                course.setMemo((String) requestData.get("memo"));
+//            }
 
             TimetableCourse savedCourse = timetableService.addCourse(timetableId, course);
             return ResponseEntity.ok(savedCourse);
@@ -279,9 +279,9 @@ public class TimetableController {
             } else {
                 course.setColorCode("#3b82f6");
             }
-            if (requestData.get("memo") != null) {
-                course.setMemo((String) requestData.get("memo"));
-            }
+//            if (requestData.get("memo") != null) {
+//                course.setMemo((String) requestData.get("memo"));
+//            }
 
             TimetableCourse updatedCourse = timetableService.updateCourse(courseId, course);
             return ResponseEntity.ok(updatedCourse);

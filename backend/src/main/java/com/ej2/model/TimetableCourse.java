@@ -158,13 +158,13 @@ public class TimetableCourse {
         this.colorCode = colorCode;
     }
 
-    public String getMemo() {
-        return memo;
-    }
-
-    public void setMemo(String memo) {
-        this.memo = memo;
-    }
+//    public String getMemo() {
+//        return memo;
+//    }
+//
+//    public void setMemo(String memo) {
+//        this.memo = memo;
+//    }
 
     public List<DaySchedule> getDaySchedules() {
         return daySchedules;
