@@ -173,4 +173,17 @@ public class PostController {
         postService.incrementLikeCount(id, userId, ipAddress);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{id}/dislike")
+    public ResponseEntity<Void> incrementDislikeCount(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long userId,
+            HttpServletRequest request) {
+
+        // Get client IP address
+        String ipAddress = getClientIpAddress(request);
+
+        postService.incrementDislikeCount(id, userId, ipAddress);
+        return ResponseEntity.ok().build();
+    }
 }
