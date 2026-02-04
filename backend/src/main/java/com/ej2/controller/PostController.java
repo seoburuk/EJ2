@@ -88,8 +88,8 @@ public class PostController {
 
     // GET /api/posts/search?keyword=xxx - Search posts by title
     @GetMapping("/search")
-    public ResponseEntity<List<Post>> searchPosts(@RequestParam String keyword) {
-        List<Post> posts = postService.searchPostsByTitle(keyword);
+    public ResponseEntity<List<PostDTO>> searchPosts(@RequestParam String keyword) {
+        List<PostDTO> posts = postService.searchPostsByTitle(keyword);
         return ResponseEntity.ok(posts);
     }
 

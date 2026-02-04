@@ -15,6 +15,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByTitleContaining(String keyword);
 
+    List<Post> findByTitleContainingOrderByCreatedAtDesc(String keyword);
+
     List<Post> findByBoardIdOrderByCreatedAtDesc(Long boardId);
 
     List<Post> findAllByOrderByViewCountDesc();

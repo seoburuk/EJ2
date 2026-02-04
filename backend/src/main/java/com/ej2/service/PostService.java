@@ -119,8 +119,9 @@ public class PostService {
     }
 
     // Search posts by title
-    public List<Post> searchPostsByTitle(String keyword) {
-        return postRepository.findByTitleContaining(keyword);
+    public List<PostDTO> searchPostsByTitle(String keyword) {
+        List<Post> posts = postRepository.findByTitleContainingOrderByCreatedAtDesc(keyword);
+        return convertToPostDTOList(posts);
     }
 
     // Get posts by board ID
@@ -173,7 +174,6 @@ public class PostService {
         // Only increment if not viewed recently
         if (!hasViewed) {
             post.setViewCount(post.getViewCount() + 1);
-            post.setUpdatedAt(post.getUpdatedAt());
             postRepository.save(post);
 
             // Log this view
@@ -211,7 +211,6 @@ public class PostService {
         // Only increment if not liked recently
         if (!hasLiked) {
             post.setLikeCount(post.getLikeCount() + 1);
-            post.setUpdatedAt(post.getUpdatedAt());
             postRepository.save(post);
 
             // Log this like
