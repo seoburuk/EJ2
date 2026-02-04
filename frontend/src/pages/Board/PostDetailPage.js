@@ -96,6 +96,17 @@ function PostDetailPage() {
     });
   };
 
+  // 投稿共有ハンドラ
+  const handleSharePost = () => {
+    const postUrl = `${window.location.origin}/boards/${boardId}/posts/${postId}`;
+    navigator.clipboard.writeText(postUrl).then(() => {
+      alert('URLのコピーに成功しました: ' + postUrl);
+    }).catch((err) => {
+      console.error('URLのコピーに失敗しました:', err);
+    });
+  };
+
+
   const handleDelete = async () => {
     if (!window.confirm('本当にこの投稿を削除しますか？')) {
       return;
@@ -259,7 +270,7 @@ function PostDetailPage() {
             <button className="action-button scrap-button">
               ⭐ スクラップ
             </button>
-            <button className="action-button share-button">
+            <button className="action-button share-button" onClick={handleSharePost}>
               🔗 共有
             </button>
           </div>

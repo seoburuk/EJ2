@@ -89,7 +89,8 @@ public class ReportController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
 
-            List<Report> reports = reportService.getMyReports(currentUser.getId());
+           // Report -> ReportDTO 로 변경
+            List<ReportDTO> reports = reportService.getMyReports(currentUser.getId());
             return ResponseEntity.ok(reports);
 
         } catch (Exception e) {
