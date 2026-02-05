@@ -163,7 +163,7 @@ function PostDetailPage() {
       }
 
       await axios.post(
-        'http://localhost:8080/api/reports',
+        '/api/reports',
         {
           reportType: 'POST',
           entityId: parseInt(postId),

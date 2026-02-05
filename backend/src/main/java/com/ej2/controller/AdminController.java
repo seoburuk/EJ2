@@ -29,7 +29,17 @@ public class AdminController {
             return false;
         }
         User currentUser = (User) userObj;
-        return "ADMIN".equals(currentUser.getRole());
+        String role = currentUser.getRole();
+        return "ADMIN".equals(role) || "SUPER_ADMIN".equals(role);
+    }
+
+    private boolean isSuperAdmin(HttpSession session) {
+        Object userObj = session.getAttribute("user");
+        if (userObj == null) {
+            return false;
+        }
+        User currentUser = (User) userObj;
+        return "SUPER_ADMIN".equals(currentUser.getRole());
     }
 
     private ResponseEntity<?> checkAdminAccess(HttpSession session) {
@@ -37,6 +47,16 @@ public class AdminController {
             Map<String, Object> error = new HashMap<String, Object>();
             error.put("success", false);
             error.put("message", "管理者権限が必要です");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+        }
+        return null;
+    }
+
+    private ResponseEntity<?> checkSuperAdminAccess(HttpSession session) {
+        if (!isSuperAdmin(session)) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", "SUPER_ADMIN権限が必要です");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
         }
         return null;
@@ -103,11 +123,39 @@ public class AdminController {
         if (accessCheck != null) return accessCheck;
 
         String newRole = request.get("role");
-        if (newRole == null || (!newRole.equals("ADMIN") && !newRole.equals("USER"))) {
+        if (newRole == null || (!newRole.equals("SUPER_ADMIN") && !newRole.equals("ADMIN") && !newRole.equals("USER"))) {
             Map<String, Object> error = new HashMap<String, Object>();
             error.put("success", false);
             error.put("message", "無効な権限です");
             return ResponseEntity.badRequest().body(error);
+        }
+
+        // 対象ユーザーの現在の権限を取得
+        User targetUser = adminService.getUserById(userId);
+        if (targetUser == null) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", "ユーザーが見つかりません");
+            return ResponseEntity.badRequest().body(error);
+        }
+
+        // SUPER_ADMIN権限はSUPER_ADMINのみ付与可能
+        if (newRole.equals("SUPER_ADMIN") && !isSuperAdmin(session)) {
+            Map<String, Object> error = new HashMap<String, Object>();
+            error.put("success", false);
+            error.put("message", "SUPER_ADMIN権限はSUPER_ADMINのみ付与できます");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+        }
+
+        // ADMINはUSERのみ変更可能（ADMIN/SUPER_ADMINは変更不可）
+        if (!isSuperAdmin(session)) {
+            String targetRole = targetUser.getRole();
+            if ("ADMIN".equals(targetRole) || "SUPER_ADMIN".equals(targetRole)) {
+                Map<String, Object> error = new HashMap<String, Object>();
+                error.put("success", false);
+                error.put("message", "管理者の権限は変更できません。SUPER_ADMINのみ変更可能です");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+            }
         }
 
         try {
@@ -148,11 +196,11 @@ public class AdminController {
         }
     }
 
-    // ==================== 掲示板管理API ====================
+    // ==================== 掲示板管理API (SUPER_ADMIN専用) ====================
 
     @GetMapping("/boards")
     public ResponseEntity<?> getAllBoards(HttpSession session) {
-        ResponseEntity<?> accessCheck = checkAdminAccess(session);
+        ResponseEntity<?> accessCheck = checkSuperAdminAccess(session);
         if (accessCheck != null) return accessCheck;
 
         List<Board> boards = adminService.getAllBoards();
@@ -163,7 +211,7 @@ public class AdminController {
     public ResponseEntity<?> createBoard(
             @RequestBody Board board,
             HttpSession session) {
-        ResponseEntity<?> accessCheck = checkAdminAccess(session);
+        ResponseEntity<?> accessCheck = checkSuperAdminAccess(session);
         if (accessCheck != null) return accessCheck;
 
         try {
@@ -182,7 +230,7 @@ public class AdminController {
             @PathVariable Long boardId,
             @RequestBody Board boardDetails,
             HttpSession session) {
-        ResponseEntity<?> accessCheck = checkAdminAccess(session);
+        ResponseEntity<?> accessCheck = checkSuperAdminAccess(session);
         if (accessCheck != null) return accessCheck;
 
         try {
@@ -200,7 +248,7 @@ public class AdminController {
     public ResponseEntity<?> deleteBoard(
             @PathVariable Long boardId,
             HttpSession session) {
-        ResponseEntity<?> accessCheck = checkAdminAccess(session);
+        ResponseEntity<?> accessCheck = checkSuperAdminAccess(session);
         if (accessCheck != null) return accessCheck;
 
         try {

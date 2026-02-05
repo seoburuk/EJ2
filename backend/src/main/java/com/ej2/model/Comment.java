@@ -42,7 +42,7 @@ public class Comment {
     private LocalDateTime updatedAt;
 
     @Transient
-    private boolean re=true;
+    private boolean refreshUpdatedAt = true;
 
     @PrePersist
     protected void onCreate() {
@@ -52,11 +52,11 @@ public class Comment {
 
     @PreUpdate
     protected void onUpdate() {
-        if(re){
-        updatedAt = LocalDateTime.now();
+        if (refreshUpdatedAt) {
+            updatedAt = LocalDateTime.now();
+        }
+        refreshUpdatedAt = true;
     }
-        re=true;
-}
     // Constructors
     public Comment() {
     }
@@ -122,7 +122,7 @@ public class Comment {
 
     public void setLikeCount(Integer likeCount) {
         this.likeCount = likeCount;
-        this.re=false;
+        this.refreshUpdatedAt = false;
     }
 
     public Integer getDislikeCount() {

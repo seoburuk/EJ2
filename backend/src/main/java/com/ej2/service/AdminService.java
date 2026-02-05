@@ -66,6 +66,13 @@ public class AdminService {
     }
 
     /**
+     * ユーザーをIDで取得
+     */
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId);
+    }
+
+    /**
      * ユーザー権限を変更
      */
     public User updateUserRole(Long userId, String newRole) {

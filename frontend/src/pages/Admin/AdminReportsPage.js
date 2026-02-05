@@ -103,10 +103,10 @@ function AdminReportsPage() {
   const [totalPages, setTotalPages] = useState(0);
   const pageSize = 20;
 
-  // 管理者権限チェック
+  // 管理者権限チェック（ADMINとSUPER_ADMINの両方を許可）
   const checkAdminAccess = useCallback(() => {
     const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
       navigate('/');
       return false;
     }

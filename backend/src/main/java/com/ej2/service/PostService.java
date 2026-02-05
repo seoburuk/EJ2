@@ -79,12 +79,12 @@ public class PostService {
     }
 
     public List<PostDTO> getAllOrderByWeekLikeCount(Long boardId) {
-        List<Post> posts = postRepository.findAllOrderByDayLikeCount(boardId);
+        List<Post> posts = postRepository.findAllOrderByWeekLikeCount(boardId);
         return convertToPostDTOList(posts);
     }
 
     public List<PostDTO> getAllOrderByMonthLikeCount(Long boardId) {
-        List<Post> posts = postRepository.findAllOrderByDayLikeCount(boardId);
+        List<Post> posts = postRepository.findAllOrderByMonthLikeCount(boardId);
         return convertToPostDTOList(posts);
     }
 
