@@ -62,8 +62,13 @@ public class SecurityConfig {
 
         http.exceptionHandling(handler -> handler
             .authenticationEntryPoint((request, response, authException) -> {
-                response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-                response.setHeader("Access-Control-Allow-Credentials", "true");
+                String origin = response.getHeader("Origin");
+                if (origin != null && 
+                    (origin.equals("http://localhost:3000") || origin.equals("http://52.79.204.202:3000"))) {
+                    response.setHeader("Access-Control-Allow-Origin", origin);
+                    response.setHeader("Access-Control-Allow-Credentials", "true");
+                }
+
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
             })
         );
@@ -75,7 +80,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
+
+        // 로컬 + 배포주소
         config.addAllowedOriginPattern("http://localhost:3000");
+        config.addAllowedOriginPattern("http://52.79.204.202:3000");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         
