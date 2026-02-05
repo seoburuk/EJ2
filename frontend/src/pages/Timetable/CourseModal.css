@@ -5,48 +5,87 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  animation: fadeInOverlay 0.3s ease-out;
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-content {
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .modal-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e9ecef;
+  padding: 24px 28px;
+  border-bottom: 1px solid #e8e8e8;
+  background: #343a40;
+  border-radius: 16px 16px 0 0;
 }
 
 .modal-header h2 {
   margin: 0;
   font-size: 20px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
 }
 
-.close-btn {
-  background: none;
+.close-button {
+  background: rgba(255, 255, 255, 0.15);
   border: none;
-  font-size: 28px;
+  font-size: 18px;
   cursor: pointer;
-  color: #6c757d;
+  color: white;
   padding: 0;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(90deg);
 }
 
 form {
-  padding: 20px;
+  padding: 24px 28px;
 }
 
 .form-group {
@@ -56,22 +95,45 @@ form {
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  font-weight: 500;
-  font-size: 14px;
-  color: #495057;
+  font-weight: 600;
+  font-size: 13px;
+  color: #555;
+  letter-spacing: 0.2px;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
   font-size: 14px;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.06);
+}
+
+.form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover {
+  border-color: #999;
 }
 
 .form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.form-row-three {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
@@ -86,121 +148,76 @@ form {
 .color-option {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: transform 0.2s;
-  border: 3px solid transparent;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
 }
 
 .color-option:hover {
-  transform: scale(1.1);
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
 }
 
 .color-option.selected {
   border-color: #333;
-  transform: scale(1.15);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 10px;
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid #e8e8e8;
 }
 
 .modal-actions button {
-  padding: 10px 20px;
+  padding: 12px 28px;
   border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  flex: 1;
 }
 
-.delete-btn {
+.delete-button {
   background: #dc3545;
   color: white;
-  margin-right: auto;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.25);
 }
 
-.cancel-btn {
-  background: #6c757d;
-  color: white;
+.delete-button:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
 }
 
-.save-btn {
-  background: #007bff;
-  color: white;
+.cancel-button {
+  background: #e9ecef;
+  color: #495057;
 }
 
-.modal-actions button:hover {
-  opacity: 0.9;
+.cancel-button:hover {
+  background: #dee2e6;
   transform: translateY(-1px);
 }
 
-/* Everytimeライクな配色 */
-:root {
-  --everytime-red: #e54459;
-  --everytime-bg: #f9f9f9;
-}
-
-.timetable-header {
-  background: white;
-  padding: 20px;
-  border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 0;
-}
-
-.header-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.header-actions button {
-  padding: 8px 16px;
-  background: var(--everytime-red);
+.save-button {
+  background: #343a40;
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-.course-cell {
-  border-radius: 4px;
-  margin: 2px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-/* 科目情報を縦並びに */
-.course-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px;
-}
-
-.course-name {
-  font-weight: 600;
-  font-size: 13px;
-  line-height: 1.3;
-}
-
-.course-classroom {
-  font-size: 11px;
-  opacity: 0.85;
-}
-
-.credits-summary {
-  background: #fff3cd;
-  padding: 12px;
-  margin: 16px 0;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 15px;
+.save-button:hover {
+  background: #212529;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* 요일 선택 버튼 스타일 */
@@ -208,51 +225,61 @@ form {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 8px;
 }
 
 .day-button {
-  padding: 10px 16px;
-  border: 2px solid #dee2e6;
+  padding: 10px 18px;
+  border: 1px solid #d0d0d0;
   border-radius: 8px;
   background: white;
-  color: #495057;
+  color: #555;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  min-width: 50px;
+  transition: all 0.2s ease;
+  min-width: 56px;
 }
 
 .day-button:hover {
-  border-color: #007bff;
-  background: #f8f9fa;
+  border-color: #999;
+  background: #f5f5f5;
+  transform: translateY(-1px);
 }
 
 .day-button.selected {
-  background: #007bff;
+  background: #343a40;
   color: white;
-  border-color: #007bff;
-  transform: scale(1.05);
+  border-color: transparent;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* 요일별 스케줄 컨테이너 */
 .day-schedules-container {
   margin-top: 16px;
   padding: 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
+  background: #f5f5f5;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
 }
 
 .day-schedule-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   margin-bottom: 12px;
   padding: 12px;
   background: white;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  transition: all 0.2s ease;
+}
+
+.day-schedule-row:hover {
+  border-color: #bbb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .day-schedule-row:last-child {
@@ -260,32 +287,48 @@ form {
 }
 
 .day-label {
-  font-weight: 600;
-  font-size: 14px;
-  color: #495057;
+  font-weight: 700;
+  font-size: 13px;
+  color: #333;
   min-width: 60px;
+  padding: 6px 12px;
+  background: #e9ecef;
+  border-radius: 6px;
+  text-align: center;
 }
 
 .time-selectors {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex: 1;
 }
 
 .time-selectors select {
   padding: 8px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
   font-size: 14px;
+  font-weight: 500;
   background: white;
   cursor: pointer;
   flex: 1;
   max-width: 100px;
+  transition: all 0.2s ease;
+}
+
+.time-selectors select:hover {
+  border-color: #999;
+}
+
+.time-selectors select:focus {
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.06);
 }
 
 .time-separator {
   font-size: 16px;
-  font-weight: 500;
-  color: #6c757d;
+  font-weight: 600;
+  color: #555;
 }

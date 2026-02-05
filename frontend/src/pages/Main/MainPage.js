@@ -294,18 +294,6 @@ function MainPage() {
             </div>
           )}
 
-          {/* Users Shortcut */}
-          <div className="users-shortcut-section" onClick={() => navigate('/users')}>
-            <div className="users-shortcut-content">
-              <span className="users-shortcut-icon">👥</span>
-              <div>
-                <h3 className="users-shortcut-title">ユーザー管理</h3>
-                <p className="users-shortcut-desc">ユーザー一覧と情報を確認</p>
-              </div>
-            </div>
-            <span className="users-shortcut-arrow">→</span>
-          </div>
-
           <div className="popular-section-eta">
             <h3 className="sidebar-title-eta">인기글</h3>
             <div className="popular-list-eta">

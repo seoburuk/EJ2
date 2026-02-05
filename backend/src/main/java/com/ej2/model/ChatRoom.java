@@ -28,7 +28,7 @@ public class ChatRoom {
 
     @Version
     @Column(name = "version")
-    private Long version;
+    private Long version = 0L;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
