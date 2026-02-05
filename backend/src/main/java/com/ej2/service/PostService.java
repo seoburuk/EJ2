@@ -69,7 +69,7 @@ public class PostService {
 
     // 조회수순 정렬
     public List<PostDTO> getByBoardIdOrderByViewCount(Long boardId) {
-        List<Post> posts = postRepository.findByBoardIdOrderByViewCountDesc(boardId);
+        List<Post> posts = postRepository.findByBoardIdAndIsBlindedFalseOrderByViewCountDesc(boardId);
         return convertToPostDTOList(posts);
     }
 
@@ -131,7 +131,7 @@ public class PostService {
 
     // Get posts by board ID
     public List<PostDTO> getPostsByBoardId(Long boardId) {
-        List<Post> posts = postRepository.findByBoardIdOrderByCreatedAtDesc(boardId);
+        List<Post> posts = postRepository.findByBoardIdAndIsBlindedFalseOrderByCreatedAtDesc(boardId);
         return convertToPostDTOList(posts);
     }
 
