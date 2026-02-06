@@ -174,7 +174,8 @@ function CommentSection({ postId, boardId, isAnonymous }) {
                 <div>
                   <span className="comment-time">{getTimeAgo(comment.createdAt)}</span>
                   {/* 수정됨 표시 로직 */}
-                  {comment.updatedAt && comment.updatedAt !== comment.createdAt && (
+                  {comment.updatedAt && comment.createdAt &&
+                   new Date(comment.updatedAt).getTime() - new Date(comment.createdAt).getTime() > 1000 && (
                     <span className="comment-time">（編集済み）</span>
                   )}
                 </div>
@@ -192,20 +193,22 @@ function CommentSection({ postId, boardId, isAnonymous }) {
                 <div className="comment-content">{comment.content}</div>
               )}
 
-              <div className="comment-actions">
-                <button className={`comment-action-btn ${likedComments[comment.id] ? 'liked' : ''}`} onClick={() => handleLikeComment(comment.id)}>
-                  👍 {comment.likeCount || 0}
-                </button>
-                <button className="comment-action-btn" onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}>
-                  💬 返信
-                </button>
-                {user.id && comment.userId === user.id && !comment.isDeleted && (
-                  <>
-                    <button className="comment-action-btn edit" onClick={() => { setEditingId(comment.id); setEditContent(comment.content); }}>✏️ 編集</button>
-                    <button className="comment-action-btn delete" onClick={() => handleDeleteComment(comment.id)}>🗑️ 削除</button>
-                  </>
-                )}
-              </div>
+              {!comment.isDeleted && (
+                <div className="comment-actions">
+                  <button className={`comment-action-btn ${likedComments[comment.id] ? 'liked' : ''}`} onClick={() => handleLikeComment(comment.id)}>
+                    👍 {comment.likeCount || 0}
+                  </button>
+                  <button className="comment-action-btn" onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}>
+                    💬 返信
+                  </button>
+                  {user.id && comment.userId === user.id && (
+                    <>
+                      <button className="comment-action-btn edit" onClick={() => { setEditingId(comment.id); setEditContent(comment.content); }}>✏️ 編集</button>
+                      <button className="comment-action-btn delete" onClick={() => handleDeleteComment(comment.id)}>🗑️ 削除</button>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* 답글 입력창 및 답글 리스트 */}
               {replyTo === comment.id && (
@@ -227,7 +230,8 @@ function CommentSection({ postId, boardId, isAnonymous }) {
                     <div>
                       <span className="comment-time">{getTimeAgo(reply.createdAt)}</span>
                       {/* 답글 수정됨 표시 로직 */}
-                      {reply.updatedAt && reply.updatedAt !== reply.createdAt && (
+                      {reply.updatedAt && reply.createdAt &&
+                       new Date(reply.updatedAt).getTime() - new Date(reply.createdAt).getTime() > 1000 && (
                         <span className="comment-time">（編集済み）</span>
                       )}
                     </div>
@@ -243,17 +247,19 @@ function CommentSection({ postId, boardId, isAnonymous }) {
                   ) : (
                     <div className="comment-content">{reply.content}</div>
                   )}
-                  <div className="comment-actions">
-                    <button className={`comment-action-btn ${likedComments[reply.id] ? 'liked' : ''}`} onClick={() => handleLikeComment(reply.id)}>
-                      👍 {reply.likeCount || 0}
-                    </button>
-                    {user.id && reply.userId === user.id && !reply.isDeleted && (
-                      <>
-                        <button className="comment-action-btn edit" onClick={() => { setEditingId(reply.id); setEditContent(reply.content); }}>✏️ 編集</button>
-                        <button className="comment-action-btn delete" onClick={() => handleDeleteComment(reply.id)}>🗑️ 削除</button>
-                      </>
-                    )}
-                  </div>
+                  {!reply.isDeleted && (
+                    <div className="comment-actions">
+                      <button className={`comment-action-btn ${likedComments[reply.id] ? 'liked' : ''}`} onClick={() => handleLikeComment(reply.id)}>
+                        👍 {reply.likeCount || 0}
+                      </button>
+                      {user.id && reply.userId === user.id && (
+                        <>
+                          <button className="comment-action-btn edit" onClick={() => { setEditingId(reply.id); setEditContent(reply.content); }}>✏️ 編集</button>
+                          <button className="comment-action-btn delete" onClick={() => handleDeleteComment(reply.id)}>🗑️ 削除</button>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

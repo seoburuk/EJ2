@@ -131,6 +131,7 @@ public class Comment {
 
     public void setDislikeCount(Integer dislikeCount) {
         this.dislikeCount = dislikeCount;
+        this.refreshUpdatedAt = false;
     }
 
     public Boolean getIsDeleted() {

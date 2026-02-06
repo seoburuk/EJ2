@@ -5,20 +5,21 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface PostLikeLogRepository extends JpaRepository<PostLikeLog, Long> {
 
-    // Check if a user (logged in) has liked this post recently
-    Optional<PostLikeLog> findByPostIdAndUserIdAndLikedAtAfter(
+    // 로그인한 사용자가 최근 이 게시글에 좋아요를 눌렀는지 확인
+    // List로 반환하여 중복 레코드 발생 시 NonUniqueResultException 방지
+    List<PostLikeLog> findByPostIdAndUserIdAndLikedAtAfter(
         Long postId,
         Long userId,
         LocalDateTime after
     );
 
-    // Check if an IP address has liked this post recently
-    Optional<PostLikeLog> findByPostIdAndIpAddressAndLikedAtAfter(
+    // IP 주소 기반으로 비로그인 사용자가 최근 좋아요를 눌렀는지 확인
+    List<PostLikeLog> findByPostIdAndIpAddressAndLikedAtAfter(
         Long postId,
         String ipAddress,
         LocalDateTime after

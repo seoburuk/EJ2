@@ -283,9 +283,6 @@ function PostDetailPage() {
             <button className="action-button dislike-button" onClick={handleDislikePost}>
               👎 よくない ({post.dislikeCount || 0})
             </button>
-            <button className="action-button scrap-button">
-              ⭐ スクラップ
-            </button>
             <button className="action-button share-button" onClick={handleSharePost}>
               🔗 共有
             </button>
