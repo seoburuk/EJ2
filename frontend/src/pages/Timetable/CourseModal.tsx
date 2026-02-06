@@ -132,7 +132,6 @@ const CourseModal: React.FC<CourseModalProps> = ({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{course ? '科目修正' : '科目追加'}</h2>
-          <button className="close-button" onClick={onClose}>×</button>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -147,7 +146,7 @@ const CourseModal: React.FC<CourseModalProps> = ({
             />
           </div>
 
-          <div className="form-row">
+          <div className="form-row-three">
             <div className="form-group">
               <label>教授</label>
               <input
@@ -165,6 +164,18 @@ const CourseModal: React.FC<CourseModalProps> = ({
                 value={formData.classroom || ''}
                 onChange={(e) => handleChange('classroom', e.target.value)}
                 placeholder="例: A101"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>単位</label>
+              <input
+                type="number"
+                step="0.5"
+                min="0"
+                max="10"
+                value={formData.credits || ''}
+                onChange={(e) => handleChange('credits', parseFloat(e.target.value))}
               />
             </div>
           </div>
@@ -219,20 +230,6 @@ const CourseModal: React.FC<CourseModalProps> = ({
               ))}
             </div>
           )}
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>単位</label>
-              <input
-                type="number"
-                step="0.5"
-                min="0"
-                max="10"
-                value={formData.credits || ''}
-                onChange={(e) => handleChange('credits', parseFloat(e.target.value))}
-              />
-            </div>
-          </div>
 
           <div className="form-group">
             <label>カラー</label>

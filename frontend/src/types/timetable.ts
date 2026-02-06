@@ -46,6 +46,6 @@ export const PERIODS = [
 
 export const COURSE_COLORS = [
   '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9',
-  '#BAE1FF', '#D4BAFF', '#FFB3E6', '#C9FFD4',
-  '#FFD4BA', '#BAF3FF'
+  '#BAE1FF', '#E0BBE4', '#FFDFD3', '#C7CEEA',
+  '#B4E7CE', '#FFC8DD'
 ] as const;

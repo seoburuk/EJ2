@@ -200,10 +200,6 @@ const TimetablePage: React.FC = () => {
 
   return (
     <div className="timetable-container">
-      <div className="credits-summary">
-        📚 履修単位: <strong>{totalCredits.toFixed(1)}</strong>
-      </div>
-
       <div className="timetable-header">
         <h1>時間表</h1>
       </div>
@@ -301,6 +297,10 @@ const TimetablePage: React.FC = () => {
             })}
           </div>
         ))}
+      </div>
+
+      <div className="credits-summary">
+        📚 履修単位: <strong>{totalCredits.toFixed(1)}</strong>
       </div>
 
       {isModalOpen && (
