@@ -37,7 +37,7 @@ const TimetablePage: React.FC = () => {
     const storedUser = localStorage.getItem('user');
     if (!storedUser) {
       // localStorage에 user 없으면 바로 로그인 페이지로
-      navigate('/login', { state: { from: '/timetable', message: '시간표를 보려면 로그인이 필요합니다.' } });
+      navigate('/login', { state: { from: '/timetable', message: 'ログインが必要です。' } });
       return;
     }
 
@@ -49,7 +49,7 @@ const TimetablePage: React.FC = () => {
     } catch (error: any) {
       // 세션 만료 또는 무효 → localStorage 정리 후 로그인 페이지로
       localStorage.removeItem('user');
-      navigate('/login', { state: { from: '/timetable', message: '세션이 만료되었습니다. 다시 로그인해주세요.' } });
+      navigate('/login', { state: { from: '/timetable', message: '再度ログインしてください。' } });
     }
   };
 
@@ -70,7 +70,7 @@ const TimetablePage: React.FC = () => {
       if (error.response?.status === 401) {
         // 세션 만료 시 로그인 페이지로 이동
         localStorage.removeItem('user');
-        navigate('/login', { state: { from: '/timetable', message: '세션이 만료되었습니다. 다시 로그인해주세요.' } });
+        navigate('/login', { state: { from: '/timetable', message: '再度ログインしてください。' } });
       }
     }
   };
@@ -104,7 +104,7 @@ const TimetablePage: React.FC = () => {
   const handleSaveCourse = async (course: TimetableCourse) => {
     try {
       if (!timetable || !timetable.timetableId) {
-        alert('시간표를 먼저 불러와주세요');
+        alert('時間表を選んでください。');
         return;
       }
 
@@ -139,7 +139,7 @@ const TimetablePage: React.FC = () => {
       const status = error.response?.status;
       if (status === 401) {
         localStorage.removeItem('user');
-        navigate('/login', { state: { from: '/timetable', message: 'セッションが切れました。再ログインしてください。' } });
+        navigate('/login', { state: { from: '/timetable', message: '再度ログインしてください。' } });
       } else if (status === 403) {
         alert('この操作を行う権限がありません。');
       } else {
@@ -149,16 +149,16 @@ const TimetablePage: React.FC = () => {
   };
 
   const handleDeleteCourse = async (courseId: number) => {
-    if (window.confirm('이 과목을 삭제하시겠습니까?')) {
+    if (window.confirm('この科目を削除しますか。')) {
       try {
         await axios.delete(`/api/timetable/course/${courseId}`, { withCredentials: true });
         loadTimetable();
         closeModal();
       } catch (error: any) {
         if (error.response?.status === 403) {
-          alert('이 과목을 삭제할 권한이 없습니다.');
+          alert('この操作を行う権限がありません。');
         } else {
-          alert('삭제 실패');
+          alert('削除に失敗しました。');
         }
       }
     }
@@ -200,12 +200,8 @@ const TimetablePage: React.FC = () => {
 
   return (
     <div className="timetable-container">
-      <div className="credits-summary">
-        📚 총 학점: <strong>{totalCredits.toFixed(1)}</strong>
-      </div>
-
       <div className="timetable-header">
-        <h1>시간표</h1>
+        <h1>時間表</h1>
       </div>
 
       <div className="semester-selector">
@@ -218,16 +214,16 @@ const TimetablePage: React.FC = () => {
           value={selectedYear}
           onChange={(e) => setSelectedYear(Number(e.target.value))}
         >
-          <option value={2024}>2024년</option>
-          <option value={2025}>2025년</option>
-          <option value={2026}>2026년</option>
+          <option value={2024}>2024年</option>
+          <option value={2025}>2025年</option>
+          <option value={2026}>2026年</option>
         </select>
         <select
           value={selectedSemester}
           onChange={(e) => setSelectedSemester(e.target.value)}
         >
-          <option value="spring">봄학기</option>
-          <option value="fall">가을학기</option>
+          <option value="spring">前期</option>
+          <option value="fall">後期</option>
         </select>
       </div>
 
@@ -301,6 +297,10 @@ const TimetablePage: React.FC = () => {
             })}
           </div>
         ))}
+      </div>
+
+      <div className="credits-summary">
+        📚 履修単位: <strong>{totalCredits.toFixed(1)}</strong>
       </div>
 
       {isModalOpen && (

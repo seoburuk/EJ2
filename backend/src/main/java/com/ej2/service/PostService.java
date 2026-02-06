@@ -5,11 +5,13 @@ import com.ej2.model.Board;
 import com.ej2.model.Post;
 import com.ej2.model.PostViewLog;
 import com.ej2.model.PostLikeLog;
+import com.ej2.model.PostDislikeLog;
 import com.ej2.model.User;
 import com.ej2.repository.BoardRepository;
 import com.ej2.repository.PostRepository;
 import com.ej2.repository.PostViewLogRepository;
 import com.ej2.repository.PostLikeLogRepository;
+import com.ej2.repository.PostDislikeLogRepository;
 import com.ej2.repository.UserRepository;
 import com.ej2.util.AnonymousIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,9 @@ public class PostService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PostDislikeLogRepository postDislikeLogRepository; 
+
     // Get all posts ordered by creation date (newest first)
     public List<PostDTO> getAllPosts() {
         List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
@@ -60,6 +65,27 @@ public class PostService {
     // 投稿エンティティを直接取得（権限検証用）
     public Post getPostEntityById(Long id) {
         return postRepository.findById(id).orElse(null);
+    }
+
+    // 조회수순 정렬
+    public List<PostDTO> getByBoardIdOrderByViewCount(Long boardId) {
+        List<Post> posts = postRepository.findByBoardIdOrderByViewCountDesc(boardId);
+        return convertToPostDTOList(posts);
+    }
+
+    public List<PostDTO> getAllOrderByDayLikeCount(Long boardId) {
+        List<Post> posts = postRepository.findAllOrderByDayLikeCount(boardId);
+        return convertToPostDTOList(posts);
+    }
+
+    public List<PostDTO> getAllOrderByWeekLikeCount(Long boardId) {
+        List<Post> posts = postRepository.findAllOrderByWeekLikeCount(boardId);
+        return convertToPostDTOList(posts);
+    }
+
+    public List<PostDTO> getAllOrderByMonthLikeCount(Long boardId) {
+        List<Post> posts = postRepository.findAllOrderByMonthLikeCount(boardId);
+        return convertToPostDTOList(posts);
     }
 
     // Create new post
@@ -98,8 +124,9 @@ public class PostService {
     }
 
     // Search posts by title
-    public List<Post> searchPostsByTitle(String keyword) {
-        return postRepository.findByTitleContaining(keyword);
+    public List<PostDTO> searchPostsByTitle(String keyword) {
+        List<Post> posts = postRepository.findByTitleContainingOrderByCreatedAtDesc(keyword);
+        return convertToPostDTOList(posts);
     }
 
     // Get posts by board ID
@@ -152,7 +179,6 @@ public class PostService {
         // Only increment if not viewed recently
         if (!hasViewed) {
             post.setViewCount(post.getViewCount() + 1);
-            post.setUpdatedAt(post.getUpdatedAt());
             postRepository.save(post);
 
             // Log this view
@@ -190,7 +216,6 @@ public class PostService {
         // Only increment if not liked recently
         if (!hasLiked) {
             post.setLikeCount(post.getLikeCount() + 1);
-            post.setUpdatedAt(post.getUpdatedAt());
             postRepository.save(post);
 
             // Log this like
@@ -202,5 +227,41 @@ public class PostService {
     // Legacy method for backward compatibility
     public void incrementLikeCount(Long id) {
         incrementLikeCount(id, null, null);
+    }
+
+    public void incrementDislikeCount(Long postId, Long userId, String ipAddress) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+
+        // Check if this user/IP has disliked this post in the last 24 hours
+        LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
+        boolean hasDisliked = false;
+
+        if (userId != null) {
+            // Check by user ID (for logged-in users)
+            Optional<PostDislikeLog> userDislikeLog = postDislikeLogRepository
+                    .findByPostIdAndUserIdAndDislikedAtAfter(postId, userId, oneDayAgo);
+            hasDisliked = userDislikeLog.isPresent();
+        } else if (ipAddress != null) {
+            // Check by IP address (for non-logged-in users)
+            Optional<PostDislikeLog> ipDislikeLog = postDislikeLogRepository
+                    .findByPostIdAndIpAddressAndDislikedAtAfter(postId, ipAddress, oneDayAgo);
+            hasDisliked = ipDislikeLog.isPresent();
+        }
+
+        // Only increment if not disliked recently
+        if (!hasDisliked) {
+            post.setDislikeCount(post.getDislikeCount() + 1);
+            post.setUpdatedAt(post.getUpdatedAt());
+            postRepository.save(post);
+
+            // Log this dislike
+            PostDislikeLog dislikeLog = new PostDislikeLog(postId, userId, ipAddress);
+            postDislikeLogRepository.save(dislikeLog);
+        }
+    }
+
+    public void incrementDislikeCount(Long id) {
+        incrementDislikeCount(id, null, null);
     }
 }

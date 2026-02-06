@@ -88,8 +88,8 @@ public class PostController {
 
     // GET /api/posts/search?keyword=xxx - Search posts by title
     @GetMapping("/search")
-    public ResponseEntity<List<Post>> searchPosts(@RequestParam String keyword) {
-        List<Post> posts = postService.searchPostsByTitle(keyword);
+    public ResponseEntity<List<PostDTO>> searchPosts(@RequestParam String keyword) {
+        List<PostDTO> posts = postService.searchPostsByTitle(keyword);
         return ResponseEntity.ok(posts);
     }
 
@@ -172,5 +172,34 @@ public class PostController {
 
         postService.incrementLikeCount(id, userId, ipAddress);
         return ResponseEntity.ok().build();
+    }
+
+    // POST /api/posts/{id}/dislike - Increment dislike count with IP tracking
+    @PostMapping("/{id}/dislike")
+    public ResponseEntity<Void> incrementDislikeCount(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long userId,
+            HttpServletRequest request) {
+
+        String ipAddress = getClientIpAddress(request);
+        postService.incrementDislikeCount(id, userId, ipAddress);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/board/{boardId}/{sortBy}")
+    public ResponseEntity<List<PostDTO>> sortPostByMean(@PathVariable Long boardId, @PathVariable String sortBy) {
+        List<PostDTO> posts = null;
+
+        if (sortBy.equals("recent")) {
+            posts = postService.getPostsByBoardId(boardId);
+        }
+        else if (sortBy.equals("likes")) {
+            posts = postService.getAllOrderByWeekLikeCount(boardId);
+        }
+        else {
+            posts = postService.getByBoardIdOrderByViewCount(boardId);
+        }
+
+        return ResponseEntity.ok(posts);
     }
 }

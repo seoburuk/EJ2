@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.OptimisticLockException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -67,7 +68,22 @@ public class ChatService {
     }
 
     // Assign sequential anonymous nickname: 匿名1, 匿名2, 匿名3...
+    // 楽観的ロックで同時実行の競合を防止（最大3回リトライ）
     public String assignNickname(Long roomId) {
+        int maxRetries = 3;
+        for (int attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                return assignNicknameInternal(roomId);
+            } catch (OptimisticLockException e) {
+                if (attempt == maxRetries - 1) {
+                    throw new RuntimeException("ニックネーム割り当てに失敗しました。再度お試しください。", e);
+                }
+            }
+        }
+        return "匿名0";
+    }
+
+    private String assignNicknameInternal(Long roomId) {
         Optional<ChatRoom> optRoom = chatRoomRepository.findById(roomId);
         if (optRoom.isPresent()) {
             ChatRoom room = optRoom.get();
@@ -81,7 +97,22 @@ public class ChatService {
     }
 
     // Increment user count only (for non-anonymous users)
+    // 楽観的ロックで同時実行の競合を防止（最大3回リトライ）
     public void incrementCurrentUsers(Long roomId) {
+        int maxRetries = 3;
+        for (int attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                incrementCurrentUsersInternal(roomId);
+                return;
+            } catch (OptimisticLockException e) {
+                if (attempt == maxRetries - 1) {
+                    throw new RuntimeException("ユーザーカウント増加に失敗しました。再度お試しください。", e);
+                }
+            }
+        }
+    }
+
+    private void incrementCurrentUsersInternal(Long roomId) {
         Optional<ChatRoom> optRoom = chatRoomRepository.findById(roomId);
         if (optRoom.isPresent()) {
             ChatRoom room = optRoom.get();
@@ -91,18 +122,33 @@ public class ChatService {
     }
 
     // User leaves room - reset nickname counter when room becomes empty
+    // 楽観的ロックで同時実行の競合を防止（最大3回リトライ）
     public void userLeave(Long roomId) {
+        int maxRetries = 3;
+        for (int attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                userLeaveInternal(roomId);
+                return;
+            } catch (OptimisticLockException e) {
+                if (attempt == maxRetries - 1) {
+                    // 最終リトライ失敗時はログのみ（退出処理なので例外は投げない）
+                    System.err.println("userLeave楽観的ロック競合: roomId=" + roomId);
+                }
+            }
+        }
+    }
+
+    private void userLeaveInternal(Long roomId) {
         Optional<ChatRoom> optRoom = chatRoomRepository.findById(roomId);
         if (optRoom.isPresent()) {
             ChatRoom room = optRoom.get();
             int count = room.getCurrentUsers() - 1;
             room.setCurrentUsers(Math.max(0, count));
-            int nickCnt = room.getNicknameCounter() - 1;
-            room.setNicknameCounter(nickCnt);
 
-            // 채팅방에 아무도 없으면 익명 번호 리셋
+            // チャットルームが空になったらニックネームカウンターをリセット
             if (count <= 0) {
                 room.setNicknameCounter(0);
+                room.setCurrentUsers(0);
             }
 
             chatRoomRepository.save(room);

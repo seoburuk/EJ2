@@ -8,6 +8,7 @@ function PostListPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const board = location.state?.board;
+  const pagingCount = 10;
 
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,11 +23,12 @@ function PostListPage() {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get(`/api/posts/board/${boardId}`);
+      const response = await axios.get(`/api/posts/board/${boardId}/${sortBy}`);
       // レスポンスはList<Post>を直接返すので、.contentではなく.dataを使用
       const posts = Array.isArray(response.data) ? response.data : [];
-      setPosts(posts);
-      setTotalPages(Math.ceil(posts.length / 20)); // 簡易的なページネーション
+      const pagingPosts = posts.slice(currentPage * pagingCount, (currentPage + 1) * pagingCount);
+      setPosts(pagingPosts);
+      setTotalPages(Math.ceil(posts.length / pagingCount)); // 簡易的なページネーション
       setLoading(false);
     } catch (error) {
       console.error('投稿の読み込みに失敗しました:', error);
@@ -45,7 +47,7 @@ function PostListPage() {
   const handleSortChange = (newSortBy) => {
     setSortBy(newSortBy);
     setCurrentPage(0);
-  };
+  }
 
   const handleSearch = async () => {
     if (!searchKeyword.trim()) {
@@ -63,7 +65,7 @@ function PostListPage() {
       // 現在の掲示板の投稿のみフィルタリング
       const filteredPosts = searchResults.filter(post => post.boardId === parseInt(boardId));
       setPosts(filteredPosts);
-      setTotalPages(Math.ceil(filteredPosts.length / 20));
+      setTotalPages(Math.ceil(filteredPosts.length / pagingCount));
       setCurrentPage(0);
     } catch (error) {
       console.error('検索に失敗しました:', error);

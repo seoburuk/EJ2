@@ -26,6 +26,10 @@ public class ChatRoom {
     @Column(name = "nickname_counter")
     private Integer nicknameCounter = 0;
 
+    @Version
+    @Column(name = "version")
+    private Long version = 0L;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -74,4 +78,7 @@ public class ChatRoom {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

@@ -44,6 +44,11 @@ public class CommentService {
         return convertToCommentDTOList(comments);
     }
 
+    public List<CommentDTO> getCommentsByPostIdDesc(Long postId) {
+        List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
+        return convertToCommentDTOList(comments);
+    }
+
     public List<CommentDTO> getTopLevelComments(Long postId) {
         List<Comment> comments = commentRepository.findByPostIdAndParentIdIsNullOrderByCreatedAtAsc(postId);
         return convertToCommentDTOList(comments);
@@ -51,6 +56,11 @@ public class CommentService {
 
     public List<CommentDTO> getReplies(Long parentId) {
         List<Comment> comments = commentRepository.findByParentIdOrderByCreatedAtAsc(parentId);
+        return convertToCommentDTOList(comments);
+    }
+
+    public List<CommentDTO> getRepliesDesc(Long parentId) {
+        List<Comment> comments = commentRepository.findByParentIdOrderByCreatedAtDesc(parentId);
         return convertToCommentDTOList(comments);
     }
 
@@ -81,6 +91,16 @@ public class CommentService {
     }
 
     public Comment createComment(Comment comment) {
+        // [추가된 부분 1] 부모 댓글(답글 대상)이 삭제되었는지 확인
+        if (comment.getParentId() != null) {
+            Comment parentComment = commentRepository.findById(comment.getParentId())
+                .orElseThrow(() -> new RuntimeException("Parent comment not found with id: " + comment.getParentId()));
+            
+            if (Boolean.TRUE.equals(parentComment.getIsDeleted())) {
+                throw new RuntimeException("削除されたコメントには返信できません。");
+            }
+        }
+
         // Check if this post is in an anonymous board
         Optional<Post> postOpt = postRepository.findById(comment.getPostId());
         if (postOpt.isPresent()) {
@@ -95,6 +115,9 @@ public class CommentService {
                 );
                 comment.setAnonymousId(anonymousId);
             }
+
+            post.setCommentCount(post.getCommentCount() + 1);
+            postRepository.save(post);
         }
 
         return commentRepository.save(comment);
@@ -114,6 +137,11 @@ public class CommentService {
                 .orElseThrow(() -> new RuntimeException("Comment not found with id: " + id));
         comment.setIsDeleted(true);
         comment.setContent("削除されたコメントです。");
+
+        Optional<Post> postOpt = postRepository.findById(comment.getPostId());
+        Post post = postOpt.get();
+        post.setCommentCount(post.getCommentCount() - 1);
+        postRepository.save(post);
         commentRepository.save(comment);
     }
 
@@ -127,6 +155,11 @@ public class CommentService {
     public boolean toggleLike(Long commentId, Long userId, String ipAddress) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found with id: " + commentId));
+
+        // [추가된 부분 2] 삭제된 댓글 좋아요 금지
+        if (Boolean.TRUE.equals(comment.getIsDeleted())) {
+            throw new RuntimeException("削除されたコメントには「いいね」を押すことができません。");
+        }
 
         Optional<CommentLikeLog> existingLike;
 

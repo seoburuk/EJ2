@@ -41,6 +41,9 @@ public class Comment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Transient
+    private boolean refreshUpdatedAt = true;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -49,9 +52,11 @@ public class Comment {
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        if (refreshUpdatedAt) {
+            updatedAt = LocalDateTime.now();
+        }
+        refreshUpdatedAt = true;
     }
-
     // Constructors
     public Comment() {
     }
@@ -117,6 +122,7 @@ public class Comment {
 
     public void setLikeCount(Integer likeCount) {
         this.likeCount = likeCount;
+        this.refreshUpdatedAt = false;
     }
 
     public Integer getDislikeCount() {

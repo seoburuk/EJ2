@@ -38,7 +38,7 @@ public class User {
 
     @com.fasterxml.jackson.annotation.JsonProperty("role")
     @Column(nullable = false, length = 20)
-    private String role = "USER";  // ADMIN 또는 USER
+    private String role = "ADMIN";  // SUPER_ADMIN, ADMIN, USER
 
     @Column(nullable = false, length = 20)
     private String status = "ACTIVE";  // ACTIVE, SUSPENDED, BANNED

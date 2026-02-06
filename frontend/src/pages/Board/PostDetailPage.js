@@ -86,6 +86,22 @@ function PostDetailPage() {
     }
   };
 
+  const handleDislikePost = async () => {
+    try {
+      // Get current user if logged in
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const userId = user.id || null;
+
+      // Send user ID as query parameter
+      const params = userId ? { userId } : {};
+      await axios.post(`/api/posts/${postId}/dislike`, null, { params });
+      fetchPost();
+    } catch (error) {
+      console.error('よくないに失敗しました:', error);  
+    } 
+  };
+
+
   const handleBack = () => {
     navigate(`/boards/${boardId}/posts`, { state: { board } });
   };
@@ -95,6 +111,17 @@ function PostDetailPage() {
       state: { board, post }
     });
   };
+
+  // 投稿共有ハンドラ
+  const handleSharePost = () => {
+    const postUrl = `${window.location.origin}/boards/${boardId}/posts/${postId}`;
+    navigator.clipboard.writeText(postUrl).then(() => {
+      alert('URLのコピーに成功しました: ' );
+    }).catch((err) => {
+      console.error('URLのコピーに失敗しました:', err);
+    });
+  };
+
 
   const handleDelete = async () => {
     if (!window.confirm('本当にこの投稿を削除しますか？')) {
@@ -136,7 +163,7 @@ function PostDetailPage() {
       }
 
       await axios.post(
-        'http://localhost:8080/ej2/api/reports',
+        '/api/reports',
         {
           reportType: 'POST',
           entityId: parseInt(postId),
@@ -253,13 +280,13 @@ function PostDetailPage() {
             <button className="action-button like-button" onClick={handleLikePost}>
               👍 いいね ({post.likeCount})
             </button>
-            <button className="action-button dislike-button">
+            <button className="action-button dislike-button" onClick={handleDislikePost}>
               👎 よくない ({post.dislikeCount || 0})
             </button>
             <button className="action-button scrap-button">
               ⭐ スクラップ
             </button>
-            <button className="action-button share-button">
+            <button className="action-button share-button" onClick={handleSharePost}>
               🔗 共有
             </button>
           </div>

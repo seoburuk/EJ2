@@ -9,6 +9,7 @@ services:
       MYSQL_DATABASE: appdb
       MYSQL_USER: appuser
       MYSQL_PASSWORD: apppassword
+      TZ: Asia/Seoul
     ports:
       - "3306:3306"
     volumes:
@@ -27,6 +28,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/appdb
       SPRING_DATASOURCE_USERNAME: appuser
       SPRING_DATASOURCE_PASSWORD: apppassword
+      TZ: Asia/Seoul
     depends_on:
       - mariadb
     networks:

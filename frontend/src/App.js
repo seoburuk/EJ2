@@ -176,11 +176,11 @@ function NavBar() {
             <Link to="/users" className="nav-link">ユーザー</Link>
           </li>
 
-          {/* 管理者メニュー（ADMINのみ表示） */}
-          {user && user.role === 'ADMIN' && (
+          {/* 管理者メニュー（ADMIN/SUPER_ADMIN表示） */}
+          {user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
             <li className="nav-item">
               <Link to="/admin" className="nav-link nav-admin">
-                🛡️ 管理者
+                🛡️ 管理者 {user.role === 'SUPER_ADMIN' && '👑'}
               </Link>
             </li>
           )}

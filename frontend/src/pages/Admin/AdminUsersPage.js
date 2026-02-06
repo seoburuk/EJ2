@@ -17,10 +17,10 @@ function AdminUsersPage() {
   const [suspendDuration, setSuspendDuration] = useState('7_DAYS');
   const [suspendReason, setSuspendReason] = useState('');
 
-  // 管理者権限チェック
+  // 管理者権限チェック（ADMINとSUPER_ADMINの両方を許可）
   const checkAdminAccess = useCallback(() => {
     const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
       navigate('/');
       return false;
     }
@@ -104,7 +104,7 @@ function AdminUsersPage() {
 
     try {
       await axios.post(
-        `http://localhost:8080/ej2/api/admin/users/${selectedUser.id}/suspend`,
+        `http://localhost:8080/api/admin/users/${selectedUser.id}/suspend`,
         { duration: suspendDuration, reason: suspendReason },
         { withCredentials: true }
       );
@@ -124,7 +124,7 @@ function AdminUsersPage() {
 
     try {
       await axios.post(
-        `http://localhost:8080/ej2/api/admin/users/${userId}/unsuspend`,
+        `http://localhost:8080/api/admin/users/${userId}/unsuspend`,
         {},
         { withCredentials: true }
       );
@@ -207,10 +207,11 @@ function AdminUsersPage() {
                   <select
                     value={user.role || 'USER'}
                     onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                    className={`role-select ${user.role === 'ADMIN' ? 'admin' : 'user'}`}
+                    className={`role-select ${user.role === 'SUPER_ADMIN' ? 'super-admin' : user.role === 'ADMIN' ? 'admin' : 'user'}`}
                   >
                     <option value="USER">USER</option>
                     <option value="ADMIN">ADMIN</option>
+                    <option value="SUPER_ADMIN">SUPER_ADMIN</option>
                   </select>
                 </td>
                 <td>{getStatusBadge(user)}</td>

@@ -9,8 +9,10 @@ public class ReportDTO {
     private Long reporterId;
     private String reporterName;
     private String reason;
+    private String description;
     private String status;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     // Constructors
     public ReportDTO() {
@@ -79,5 +81,21 @@ public class ReportDTO {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

@@ -19,10 +19,10 @@ function AdminBoardsPage() {
   });
   const navigate = useNavigate();
 
-  // 管理者権限チェック
+  // SUPER_ADMIN権限チェック（掲示板管理はSUPER_ADMIN専用）
   const checkAdminAccess = useCallback(() => {
     const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || user.role !== 'SUPER_ADMIN') {
       navigate('/');
       return false;
     }

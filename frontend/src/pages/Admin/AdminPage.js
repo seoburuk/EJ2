@@ -80,6 +80,7 @@ function AdminPage() {
   const [error, setError] = useState('');
   const [currentTime, setCurrentTime] = useState(new Date());
   const navigate = useNavigate();
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   // 現在時刻を更新
   useEffect(() => {
@@ -87,10 +88,10 @@ function AdminPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // 管理者権限チェック
+  // 管理者権限チェック（ADMINとSUPER_ADMINの両方を許可）
   const checkAdminAccess = useCallback(() => {
     const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
       navigate('/');
       return false;
     }
@@ -105,7 +106,7 @@ function AdminPage() {
         axios.get('/api/admin/dashboard/weekly', { withCredentials: true }),
         axios.get('/api/admin/dashboard/activity', { withCredentials: true }),
         axios.get('/api/admin/dashboard/board-stats', { withCredentials: true }),
-        axios.get('http://localhost:8080/ej2/api/admin/reports/stats', { withCredentials: true })
+        axios.get('http://localhost:8080/api/admin/reports/stats', { withCredentials: true })
       ]);
 
       setStats(statsRes.data);
@@ -345,11 +346,13 @@ function AdminPage() {
                 <span>ユーザー管理</span>
                 <span className="menu-arrow">→</span>
               </Link>
-              <Link to="/admin/boards" className="quick-menu-item">
-                <FiLayout />
-                <span>掲示板管理</span>
-                <span className="menu-arrow">→</span>
-              </Link>
+              {currentUser.role === 'SUPER_ADMIN' && (
+                <Link to="/admin/boards" className="quick-menu-item">
+                  <FiLayout />
+                  <span>掲示板管理</span>
+                  <span className="menu-arrow">→</span>
+                </Link>
+              )}
               <Link to="/admin/reports" className="quick-menu-item">
                 <FiAlertTriangle />
                 <span>報告管理</span>

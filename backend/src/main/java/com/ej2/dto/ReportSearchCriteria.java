@@ -7,6 +7,7 @@ public class ReportSearchCriteria {
     private String sortOrder;
     private Integer page;
     private Integer size;
+    private Long reporterId;   
 
     // Constructors
     public ReportSearchCriteria() {
@@ -59,5 +60,12 @@ public class ReportSearchCriteria {
 
     public void setSize(Integer size) {
         this.size = size;
+    }
+
+    public Long getReporterId() {
+        return reporterId;
+    }
+    public void setReporterId(Long reporterId) {
+        this.reporterId = reporterId;
     }
 }

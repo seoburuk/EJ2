@@ -24,7 +24,7 @@ public class CommentController {
     // GET /api/comments/post/{postId} - Get all comments for a post
     @GetMapping("/post/{postId}")
     public ResponseEntity<List<CommentDTO>> getCommentsByPostId(@PathVariable Long postId) {
-        List<CommentDTO> comments = commentService.getCommentsByPostId(postId);
+        List<CommentDTO> comments = commentService.getCommentsByPostIdDesc(postId);
         return ResponseEntity.ok(comments);
     }
 
@@ -38,7 +38,7 @@ public class CommentController {
     // GET /api/comments/{id}/replies - Get replies for a comment
     @GetMapping("/{id}/replies")
     public ResponseEntity<List<CommentDTO>> getReplies(@PathVariable Long id) {
-        List<CommentDTO> replies = commentService.getReplies(id);
+        List<CommentDTO> replies = commentService.getRepliesDesc(id);
         return ResponseEntity.ok(replies);
     }
 

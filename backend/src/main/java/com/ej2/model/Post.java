@@ -61,7 +61,7 @@ public class Post {
 
     // 업데이트 시간 갱신 필요없는 필드 변경시 사용
     @Transient
-    private boolean refreshUpdatedAt;
+    private boolean refreshUpdatedAt = true;
 
     @PrePersist
     protected void onCreate() {

@@ -4,7 +4,8 @@ import './UsersPage.css';
 
 function UsersPage() {
   const [users, setUsers] = useState([]);
-  const [newUser, setNewUser] = useState({ name: '', email: '' });
+  const [newUser, setNewUser] = useState({ username: '', name: '', email: '', password: '' });
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchUsers();
@@ -21,12 +22,24 @@ function UsersPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    if (newUser.password.length < 6) {
+      setError('パスワードは6文字以上である必要があります');
+      return;
+    }
+
     try {
-      await axios.post('/api/users', newUser);
-      setNewUser({ name: '', email: '' });
+      await axios.post('/api/auth/register', newUser);
+      setNewUser({ username: '', name: '', email: '', password: '' });
       fetchUsers();
     } catch (error) {
       console.error('Error creating user:', error);
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError('ユーザーの追加に失敗しました');
+      }
     }
   };
 
@@ -42,33 +55,48 @@ function UsersPage() {
   return (
     <div className="users-page">
       <div className="form-container">
-        <h2>사용자 추가</h2>
+        <h2>ユーザー追加</h2>
+        {error && <div className="error-message" style={{color: 'red', marginBottom: '10px'}}>{error}</div>}
         <form onSubmit={handleSubmit}>
           <input
             type="text"
-            placeholder="이름"
+            placeholder="ユーザーID"
+            value={newUser.username}
+            onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+            required
+          />
+          <input
+            type="text"
+            placeholder="名前"
             value={newUser.name}
             onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
             required
           />
           <input
             type="email"
-            placeholder="이메일"
+            placeholder="メールアドレス"
             value={newUser.email}
             onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
             required
           />
-          <button type="submit">추가</button>
+          <input
+            type="password"
+            placeholder="パスワード（6文字以上）"
+            value={newUser.password}
+            onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+            required
+          />
+          <button type="submit">追加</button>
         </form>
       </div>
 
       <div className="users-container">
-        <h2>사용자 목록</h2>
+        <h2>ユーザー一覧</h2>
         <ul>
           {users.map((user) => (
             <li key={user.id}>
-              <span>{user.name} - {user.email}</span>
-              <button onClick={() => handleDelete(user.id)}>삭제</button>
+              <span>{user.username} ({user.name}) - {user.email}</span>
+              <button onClick={() => handleDelete(user.id)}>削除</button>
             </li>
           ))}
         </ul>
