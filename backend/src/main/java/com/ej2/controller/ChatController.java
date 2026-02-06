@@ -119,6 +119,9 @@ public class ChatController {
         headerAccessor.getSessionAttributes().put("nickname", message.getSenderNickname());
         headerAccessor.getSessionAttributes().put("roomId", roomId);
 
+        // WebSocket接続成功時にcurrentUsersを増加（REST/WebSocketライフサイクル一致）
+        chatService.incrementCurrentUsers(roomId);
+
         return chatService.saveMessage(message);
     }
 
