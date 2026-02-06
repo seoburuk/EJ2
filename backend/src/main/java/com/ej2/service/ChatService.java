@@ -89,7 +89,7 @@ public class ChatService {
             ChatRoom room = optRoom.get();
             int nextNumber = room.getNicknameCounter() + 1;
             room.setNicknameCounter(nextNumber);
-            room.setCurrentUsers(room.getCurrentUsers() + 1);
+            // currentUsersはWebSocket JOIN時に増加させる（REST/WebSocketライフサイクル不一致防止）
             chatRoomRepository.save(room);
             return "匿名" + nextNumber;
         }
