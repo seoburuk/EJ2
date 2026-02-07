@@ -172,10 +172,6 @@ function NavBar() {
           <li className="nav-item">
             <Link to="/timetable" className="nav-link">時間割</Link>
           </li>
-          <li className="nav-item">
-            <Link to="/users" className="nav-link">ユーザー</Link>
-          </li>
-
           {/* 管理者メニュー（ADMIN/SUPER_ADMIN表示） */}
           {user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
             <li className="nav-item">
