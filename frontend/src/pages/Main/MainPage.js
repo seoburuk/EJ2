@@ -261,9 +261,7 @@ function MainPage() {
                     <div className="popular-title-eta">{post.title}</div>
                     <div className="popular-stats-eta">
                       👁 {post.viewCount || 0}
-                      <span className="stat-separator"> / </span>
                       👍 {post.likeCount || 0}
-                      <span className="stat-separator"> / </span>
                       💬 {post.commentCount || 0}
                     </div>
                   </div>
