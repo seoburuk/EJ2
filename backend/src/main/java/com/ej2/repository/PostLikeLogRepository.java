@@ -24,4 +24,10 @@ public interface PostLikeLogRepository extends JpaRepository<PostLikeLog, Long> 
         String ipAddress,
         LocalDateTime after
     );
+
+    // 로그인한 사용자가 이 게시글에 좋아요를 눌렀는지 확인 (시간 무관)
+    List<PostLikeLog> findByPostIdAndUserId(Long postId, Long userId);
+
+    // IP 주소 기반으로 비로그인 사용자가 좋아요를 눌렀는지 확인 (시간 무관)
+    List<PostLikeLog> findByPostIdAndIpAddress(Long postId, String ipAddress);
 }

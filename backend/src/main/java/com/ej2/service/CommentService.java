@@ -131,18 +131,29 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    // コメントを削除（ソフトデリート）
+    // コメントを削除（ハードデリート - 子コメントは孤立化）
     public void deleteComment(Long id) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Comment not found with id: " + id));
-        comment.setIsDeleted(true);
-        comment.setContent("削除されたコメントです。");
 
+        // 子コメントを孤立化（parentIdをnullに設定）
+        List<Comment> childComments = commentRepository.findByParentIdOrderByCreatedAtAsc(id);
+        for (Comment child : childComments) {
+            child.setParentId(null);
+            commentRepository.save(child);
+        }
+
+        // 投稿のコメント数を減少
         Optional<Post> postOpt = postRepository.findById(comment.getPostId());
         Post post = postOpt.get();
-        post.setCommentCount(post.getCommentCount() - 1);
+        post.setCommentCount(Math.max(0, post.getCommentCount() - 1));
         postRepository.save(post);
-        commentRepository.save(comment);
+
+        // 関連する「いいね」ログを削除
+        commentLikeLogRepository.deleteByCommentId(id);
+
+        // コメントをハードデリート
+        commentRepository.delete(comment);
     }
 
     public Long getCommentCount(Long postId) {

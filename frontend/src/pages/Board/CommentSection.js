@@ -133,7 +133,6 @@ function CommentSection({ postId, boardId, isAnonymous }) {
     const now = new Date();
     const past = new Date(dateString);
     const diffInMinutes = Math.floor((now - past) / (1000 * 60));
-    if (diffInMinutes < 1) return 'たった今';
     if (diffInMinutes < 60) return `${diffInMinutes}分前`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}時間前`;
     if (diffInMinutes < 10080) return `${Math.floor(diffInMinutes / 1440)}日前`;
@@ -173,11 +172,6 @@ function CommentSection({ postId, boardId, isAnonymous }) {
                 </span>
                 <div>
                   <span className="comment-time">{getTimeAgo(comment.createdAt)}</span>
-                  {/* 수정됨 표시 로직 */}
-                  {comment.updatedAt && comment.createdAt &&
-                   new Date(comment.updatedAt).getTime() - new Date(comment.createdAt).getTime() > 1000 && (
-                    <span className="comment-time">（編集済み）</span>
-                  )}
                 </div>
               </div>
 

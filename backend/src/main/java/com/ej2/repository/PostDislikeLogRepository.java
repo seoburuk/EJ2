@@ -24,4 +24,10 @@ public interface PostDislikeLogRepository extends JpaRepository<PostDislikeLog, 
         String ipAddress,
         LocalDateTime after
     );
+
+    // 로그인한 사용자가 이 게시글에 싫어요를 눌렀는지 확인 (시간 무관)
+    List<PostDislikeLog> findByPostIdAndUserId(Long postId, Long userId);
+
+    // IP 주소 기반으로 비로그인 사용자가 싫어요를 눌렀는지 확인 (시간 무관)
+    List<PostDislikeLog> findByPostIdAndIpAddress(Long postId, String ipAddress);
 }
