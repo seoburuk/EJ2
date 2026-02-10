@@ -43,7 +43,10 @@ public class PostService {
     private UserRepository userRepository;
 
     @Autowired
-    private PostDislikeLogRepository postDislikeLogRepository; 
+    private PostDislikeLogRepository postDislikeLogRepository;
+
+    @Autowired
+    private PostImageService postImageService; 
 
     // Get all posts ordered by creation date (newest first)
     public List<PostDTO> getAllPosts() {
@@ -120,6 +123,11 @@ public class PostService {
     public void deletePost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
+
+        // Delete all images associated with this post (from S3 and database)
+        postImageService.deleteImagesByPostId(id);
+
+        // Delete the post
         postRepository.delete(post);
     }
 

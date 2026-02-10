@@ -12,6 +12,7 @@ function PostDetailPage() {
 
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [images, setImages] = useState([]);
 
   // 報告モーダル状態
   const [showReportModal, setShowReportModal] = useState(false);
@@ -20,6 +21,7 @@ function PostDetailPage() {
 
   useEffect(() => {
     fetchPost();
+    fetchImages();
     incrementViewCount();
   }, [postId]);
 
@@ -54,6 +56,17 @@ function PostDetailPage() {
       };
       setPost(mockPost);
       setLoading(false);
+    }
+  };
+
+  const fetchImages = async () => {
+    try {
+      const response = await axios.get(`/api/posts/${postId}/images`);
+      setImages(response.data);
+    } catch (error) {
+      console.error('画像の読み込みに失敗しました:', error);
+      // No images or error - set empty array
+      setImages([]);
     }
   };
 
@@ -274,6 +287,22 @@ function PostDetailPage() {
                 <p key={index}>{line}</p>
               ))}
             </div>
+
+            {/* Image gallery */}
+            {images.length > 0 && (
+              <div className="post-images">
+                {images.map((image, index) => (
+                  <div key={image.id} className="post-image-wrapper">
+                    <img
+                      src={image.s3Url}
+                      alt={image.originalFilename || `Image ${index + 1}`}
+                      className="post-image"
+                      loading="lazy"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="post-actions">
