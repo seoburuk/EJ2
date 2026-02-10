@@ -13,6 +13,7 @@ function PostDetailPage() {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState([]);
+  const [userReaction, setUserReaction] = useState('none'); // 'like', 'dislike', 'none'
 
   // 報告モーダル状態
   const [showReportModal, setShowReportModal] = useState(false);
@@ -29,6 +30,19 @@ function PostDetailPage() {
     try {
       const response = await axios.get(`/api/posts/${postId}`);
       setPost(response.data);
+
+      // 사용자의 현재 반응 상태 가져오기
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const userId = user.id || null;
+      const params = userId ? { userId } : {};
+      try {
+        const reactionResponse = await axios.get(`/api/posts/${postId}/reaction/status`, { params });
+        setUserReaction(reactionResponse.data.reaction);
+      } catch (reactionError) {
+        console.error('反応状態の取得に失敗しました:', reactionError);
+        setUserReaction('none');
+      }
+
       setLoading(false);
     } catch (error) {
       console.error('投稿の読み込みに失敗しました:', error);
@@ -92,8 +106,9 @@ function PostDetailPage() {
 
       // Send user ID as query parameter
       const params = userId ? { userId } : {};
-      await axios.post(`/api/posts/${postId}/like`, null, { params });
-      fetchPost();
+      const response = await axios.post(`/api/posts/${postId}/like`, null, { params });
+      setUserReaction(response.data.reaction); // 'like' 또는 'none'
+      fetchPost(); // 카운트 업데이트
     } catch (error) {
       console.error('いいねに失敗しました:', error);
     }
@@ -107,11 +122,12 @@ function PostDetailPage() {
 
       // Send user ID as query parameter
       const params = userId ? { userId } : {};
-      await axios.post(`/api/posts/${postId}/dislike`, null, { params });
-      fetchPost();
+      const response = await axios.post(`/api/posts/${postId}/dislike`, null, { params });
+      setUserReaction(response.data.reaction); // 'dislike' 또는 'none'
+      fetchPost(); // 카운트 업데이트
     } catch (error) {
-      console.error('よくないに失敗しました:', error);  
-    } 
+      console.error('よくないに失敗しました:', error);
+    }
   };
 
 
@@ -306,10 +322,16 @@ function PostDetailPage() {
           </div>
 
           <div className="post-actions">
-            <button className="action-button like-button" onClick={handleLikePost}>
+            <button
+              className={`action-button like-button ${userReaction === 'like' ? 'active' : ''}`}
+              onClick={handleLikePost}
+            >
               👍 いいね ({post.likeCount})
             </button>
-            <button className="action-button dislike-button" onClick={handleDislikePost}>
+            <button
+              className={`action-button dislike-button ${userReaction === 'dislike' ? 'active' : ''}`}
+              onClick={handleDislikePost}
+            >
               👎 よくない ({post.dislikeCount || 0})
             </button>
             <button className="action-button share-button" onClick={handleSharePost}>

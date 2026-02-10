@@ -9,7 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -160,9 +162,9 @@ public class PostController {
         return ipAddress;
     }
 
-    // POST /api/posts/{id}/like - Increment like count with IP tracking
+    // POST /api/posts/{id}/like - Toggle like (mutual exclusive with dislike)
     @PostMapping("/{id}/like")
-    public ResponseEntity<Void> incrementLikeCount(
+    public ResponseEntity<Map<String, Object>> incrementLikeCount(
             @PathVariable Long id,
             @RequestParam(required = false) Long userId,
             HttpServletRequest request) {
@@ -171,19 +173,42 @@ public class PostController {
         String ipAddress = getClientIpAddress(request);
 
         postService.incrementLikeCount(id, userId, ipAddress);
-        return ResponseEntity.ok().build();
+        String reaction = postService.getUserReaction(id, userId, ipAddress);
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("reaction", reaction);
+        return ResponseEntity.ok(response);
     }
 
-    // POST /api/posts/{id}/dislike - Increment dislike count with IP tracking
+    // POST /api/posts/{id}/dislike - Toggle dislike (mutual exclusive with like)
     @PostMapping("/{id}/dislike")
-    public ResponseEntity<Void> incrementDislikeCount(
+    public ResponseEntity<Map<String, Object>> incrementDislikeCount(
             @PathVariable Long id,
             @RequestParam(required = false) Long userId,
             HttpServletRequest request) {
 
         String ipAddress = getClientIpAddress(request);
         postService.incrementDislikeCount(id, userId, ipAddress);
-        return ResponseEntity.ok().build();
+        String reaction = postService.getUserReaction(id, userId, ipAddress);
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("reaction", reaction);
+        return ResponseEntity.ok(response);
+    }
+
+    // GET /api/posts/{id}/reaction/status - Get user's current reaction
+    @GetMapping("/{id}/reaction/status")
+    public ResponseEntity<Map<String, String>> getReactionStatus(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long userId,
+            HttpServletRequest request) {
+
+        String ipAddress = getClientIpAddress(request);
+        String reaction = postService.getUserReaction(id, userId, ipAddress);
+
+        Map<String, String> response = new HashMap<String, String>();
+        response.put("reaction", reaction);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/board/{boardId}/{sortBy}")

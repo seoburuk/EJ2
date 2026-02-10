@@ -207,10 +207,26 @@
   color: #5c6bc0;
 }
 
+/* Active state for like button */
+.like-button.active {
+  border-color: #5c6bc0;
+  background: #e8eaf6;
+  color: #5c6bc0;
+  font-weight: 700;
+}
+
 .dislike-button:hover {
   border-color: #ef5350;
   background: #ffebee;
   color: #ef5350;
+}
+
+/* Active state for dislike button */
+.dislike-button.active {
+  border-color: #ef5350;
+  background: #ffebee;
+  color: #ef5350;
+  font-weight: 700;
 }
 
 .scrap-button:hover {
