@@ -23,7 +23,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("http://localhost", "http://elasticjapan.duckdns.org")
+                .allowedOriginPatterns("http://localhost", "http://elasticjapan.duckdns.org", "https://elasticjapan.duckdns.org")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
