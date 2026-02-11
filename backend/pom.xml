@@ -155,11 +155,11 @@
             <version>0.4</version>
         </dependency>
 
-        <!-- SendGrid -->
+        <!-- JavaMail API for Gmail SMTP -->
         <dependency>
-            <groupId>com.sendgrid</groupId>
-            <artifactId>sendgrid-java</artifactId>
-            <version>4.9.3</version>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.2</version>
         </dependency>
 
         <!-- AWS SDK for S3 -->
