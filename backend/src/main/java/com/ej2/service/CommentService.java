@@ -131,18 +131,70 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    // コメントを削除（ソフトデリート）
+    // コメントを削除（子コメントの有無に応じて処理分岐 + 親の自動クリーンアップ）
     public void deleteComment(Long id) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Comment not found with id: " + id));
-        comment.setIsDeleted(true);
-        comment.setContent("削除されたコメントです。");
 
-        Optional<Post> postOpt = postRepository.findById(comment.getPostId());
-        Post post = postOpt.get();
-        post.setCommentCount(post.getCommentCount() - 1);
-        postRepository.save(post);
-        commentRepository.save(comment);
+        Long parentId = comment.getParentId(); // 부모 ID 미리 저장
+
+        // 子コメント（답글）の有無を確認
+        List<Comment> childComments = commentRepository.findByParentIdOrderByCreatedAtAsc(id);
+        boolean hasChildren = !childComments.isEmpty();
+
+        if (hasChildren) {
+            // 답글이 있으면 소프트 삭제
+            comment.setIsDeleted(true);
+            comment.setContent("削除されたコメントです。");
+            commentRepository.save(comment);
+
+            // 게시글 댓글 수 감소
+            Optional<Post> postOpt = postRepository.findById(comment.getPostId());
+            if (postOpt.isPresent()) {
+                Post post = postOpt.get();
+                post.setCommentCount(Math.max(0, post.getCommentCount() - 1));
+                postRepository.save(post);
+            }
+        } else {
+            // 답글이 없으면 하드 삭제
+
+            // 게시글 댓글 수 감소
+            Optional<Post> postOpt = postRepository.findById(comment.getPostId());
+            if (postOpt.isPresent()) {
+                Post post = postOpt.get();
+                post.setCommentCount(Math.max(0, post.getCommentCount() - 1));
+                postRepository.save(post);
+            }
+
+            // 관련 좋아요 로그 삭제
+            commentLikeLogRepository.deleteByCommentId(id);
+
+            // 댓글 하드 삭제
+            commentRepository.delete(comment);
+        }
+
+        // ✨ 자동 정리: 부모가 소프트 삭제 상태이고 남은 자식이 없으면 부모도 하드 삭제
+        if (parentId != null) {
+            Optional<Comment> parentOpt = commentRepository.findById(parentId);
+            if (parentOpt.isPresent()) {
+                Comment parent = parentOpt.get();
+                if (Boolean.TRUE.equals(parent.getIsDeleted())) {
+                    // 부모의 남은 자식 확인
+                    List<Comment> remainingChildren = commentRepository.findByParentIdOrderByCreatedAtAsc(parentId);
+                    if (remainingChildren.isEmpty()) {
+                        // 남은 자식이 없으면 부모도 하드 삭제
+
+                        // 부모의 게시글 댓글 수는 이미 소프트 삭제 시 감소되었으므로 추가 감소 불필요
+
+                        // 부모의 좋아요 로그 삭제
+                        commentLikeLogRepository.deleteByCommentId(parentId);
+
+                        // 부모 하드 삭제
+                        commentRepository.delete(parent);
+                    }
+                }
+            }
+        }
     }
 
     public Long getCommentCount(Long postId) {

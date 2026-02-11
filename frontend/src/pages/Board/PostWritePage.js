@@ -109,27 +109,7 @@ function PostWritePage() {
     console.log('投稿データ準備中...');
 
     try {
-      let imageUrls = [];
-
-      // Upload images if there are any
-      if (selectedImages.length > 0) {
-        const imageFormData = new FormData();
-        selectedImages.forEach(image => {
-          imageFormData.append('files', image);
-        });
-
-        const uploadResponse = await axios.post('/api/upload/images', imageFormData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-
-        if (uploadResponse.data.success && uploadResponse.data.files) {
-          imageUrls = uploadResponse.data.files.map(file => file.url);
-        }
-      }
-
-      // Create post (imageUrls will be saved separately)
+      // Phase 1: Create post first
       const postData = {
         boardId: parseInt(boardId),
         userId: user.id,
@@ -141,19 +121,41 @@ function PostWritePage() {
         commentCount: 0
       };
 
-      // TODO: Save imageUrls to PostImage table after creating post
-      // For now, images are uploaded but not linked to the post
-      console.log('Uploaded image URLs:', imageUrls);
       console.log('投稿データ:', postData);
+      const postResponse = await axios.post('/api/posts', postData);
+      console.log('投稿作成成功:', postResponse.data);
 
-      const response = await axios.post('/api/posts', postData);
-      console.log('投稿作成成功:', response.data);
+      const postId = postResponse.data.id;
+
+      // Phase 2: Upload images to S3 and link to post (if any)
+      if (selectedImages.length > 0) {
+        console.log(`画像アップロード開始 (${selectedImages.length}枚)`);
+
+        const imageFormData = new FormData();
+        selectedImages.forEach(image => {
+          imageFormData.append('images', image);
+        });
+
+        try {
+          const imageResponse = await axios.post(`/api/posts/${postId}/images`, imageFormData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+          console.log('画像アップロード成功:', imageResponse.data);
+        } catch (imageError) {
+          console.error('画像アップロード失敗:', imageError);
+          // Post is created successfully, but image upload failed
+          // Show warning but still navigate to post
+          alert('投稿は作成されましたが、画像のアップロードに失敗しました。\n後で編集して画像を追加してください。');
+        }
+      }
 
       // Clean up preview URLs
       imagePreviewUrls.forEach(url => URL.revokeObjectURL(url));
 
       // Success - redirect to post detail
-      navigate(`/boards/${boardId}/posts/${response.data.id}`, {
+      navigate(`/boards/${boardId}/posts/${postResponse.data.id}`, {
         state: { board }
       });
     } catch (err) {

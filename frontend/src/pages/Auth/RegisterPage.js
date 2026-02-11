@@ -16,6 +16,8 @@ function RegisterPage() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
   const navigate = useNavigate();
 
   // フォーム入力変更ハンドラー
@@ -68,14 +70,9 @@ function RegisterPage() {
       });
 
       if (response.data.success) {
-        // 会員登録成功: ユーザー情報をlocalStorageに保存
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-
-        // NavBarにログイン状態の変更を通知
-        window.dispatchEvent(new Event('authChange'));
-
-        // メインページへリダイレクト
-        navigate('/');
+        // 会員登録成功: メール認証画面を表示
+        setRegisteredEmail(formData.email);
+        setRegistrationSuccess(true);
       } else {
         setError(response.data.message);
       }
@@ -89,6 +86,29 @@ function RegisterPage() {
       setLoading(false);
     }
   };
+
+  // 登録成功後の認証待ち画面
+  if (registrationSuccess) {
+    return (
+      <div className="auth-container">
+        <div className="auth-card verification-success">
+          <div className="success-icon">✓</div>
+          <h2 className="auth-title">会員登録完了</h2>
+          <div className="verification-message">
+            <p><strong>{registeredEmail}</strong> 宛に認証メールを送信しました。</p>
+            <p>メールボックスをご確認の上、認証リンクをクリックしてアカウントを有効化してください。</p>
+            <p className="note">メールが届かない場合は、迷惑メールフォルダをご確認ください。</p>
+          </div>
+          <button
+            onClick={() => navigate('/login')}
+            className="auth-button"
+          >
+            ログインページへ
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-container">

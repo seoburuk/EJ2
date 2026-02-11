@@ -16,8 +16,13 @@ function ChatPage() {
   const messagesEndRef = useRef(null);
   const subscriptionRef = useRef(null);
   const nicknameRef = useRef('');
+  const initCalledRef = useRef(false);
 
   useEffect(() => {
+    if (initCalledRef.current) {
+      return;
+    }
+    initCalledRef.current = true;
     initChat();
 
     const handleBeforeUnload = () => {
@@ -40,12 +45,31 @@ function ChatPage() {
   };
 
   const initChat = async () => {
+    // 以前の接続をクリーンアップ（ポップアップ再ナビゲーション時の対策）
+    disconnectSync();
+    // 旧接続のWebSocket切断完了を待つ（旧LEAVEと新JOINの競合防止）
+    await new Promise(function(resolve) { setTimeout(resolve, 300); });
+
     try {
-      // 1. Get nickname (anonymous)
-      const nicknameRes = await axios.post(`/api/chat/rooms/${GLOBAL_ROOM_ID}/nickname`, {
-        useAnonymous: true
-      });
-      const assignedNickname = nicknameRes.data.nickname;
+      // 1. Get nickname (anonymous) — sessionStorageでキャッシュ
+      let assignedNickname = sessionStorage.getItem('ej2-chat-nickname');
+
+      if (!assignedNickname) {
+        // セッショントークン生成（バックエンド冪等性保証用）
+        let sessionToken = sessionStorage.getItem('ej2-chat-session-token');
+        if (!sessionToken) {
+          sessionToken = Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+          sessionStorage.setItem('ej2-chat-session-token', sessionToken);
+        }
+
+        const nicknameRes = await axios.post(`/api/chat/rooms/${GLOBAL_ROOM_ID}/nickname`, {
+          useAnonymous: true,
+          sessionToken: sessionToken
+        });
+        assignedNickname = nicknameRes.data.nickname;
+        sessionStorage.setItem('ej2-chat-nickname', assignedNickname);
+      }
+
       setNickname(assignedNickname);
       nicknameRef.current = assignedNickname;
 

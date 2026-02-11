@@ -14,12 +14,16 @@ import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import PasswordResetPage from './pages/Auth/PasswordResetPage';
 import FindAccountPage from './pages/Auth/FindAccountPage';
+import EmailVerificationPage from './pages/Auth/EmailVerificationPage';
 import ChatPage from './pages/Chat/ChatPage';
 import AdminPage from './pages/Admin/AdminPage';
 import AdminUsersPage from './pages/Admin/AdminUsersPage';
 import AdminBoardsPage from './pages/Admin/AdminBoardsPage';
 import AdminReportsPage from './pages/Admin/AdminReportsPage';
 import './App.css';
+
+// チャットポップアップウィンドウの参照（連打防止）
+let chatWindowRef = null;
 
 function NavBar() {
   const [boards, setBoards] = useState([]);
@@ -166,16 +170,16 @@ function NavBar() {
           <li className="nav-item">
             <a href="/chat" className="nav-link" onClick={(e) => {
               e.preventDefault();
-              window.open('/chat', 'ej2-chat', 'width=500,height=700,scrollbars=yes,resizable=yes');
+              if (chatWindowRef && !chatWindowRef.closed) {
+                chatWindowRef.focus();
+                return;
+              }
+              chatWindowRef = window.open('/chat', 'ej2-chat', 'width=500,height=700,scrollbars=yes,resizable=yes');
             }}>チャット</a>
           </li>
           <li className="nav-item">
             <Link to="/timetable" className="nav-link">時間割</Link>
           </li>
-          <li className="nav-item">
-            <Link to="/users" className="nav-link">ユーザー</Link>
-          </li>
-
           {/* 管理者メニュー（ADMIN/SUPER_ADMIN表示） */}
           {user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
             <li className="nav-item">
@@ -231,6 +235,7 @@ function AppContent() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/password-reset" element={<PasswordResetPage />} />
           <Route path="/find-account" element={<FindAccountPage />} />
+          <Route path="/verify-email" element={<EmailVerificationPage />} />
 
           {/* 管理者ページ */}
           <Route path="/admin" element={<AdminPage />} />

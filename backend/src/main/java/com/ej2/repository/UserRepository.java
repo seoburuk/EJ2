@@ -68,6 +68,21 @@ public class UserRepository {
     }
 
     /**
+     * メール認証トークンでユーザーを検索
+     * @param emailVerificationToken メール認証トークン
+     * @return 見つかったユーザー、存在しない場合はnull
+     */
+    public User findByEmailVerificationToken(String emailVerificationToken) {
+        try {
+            return entityManager.createQuery("SELECT u FROM User u WHERE u.emailVerificationToken = :token", User.class)
+                    .setParameter("token", emailVerificationToken)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    /**
      * ユーザー名が既に存在するか確認
      * @param username ユーザー名
      * @return 存在する場合はtrue

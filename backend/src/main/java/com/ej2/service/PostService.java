@@ -43,7 +43,10 @@ public class PostService {
     private UserRepository userRepository;
 
     @Autowired
-    private PostDislikeLogRepository postDislikeLogRepository; 
+    private PostDislikeLogRepository postDislikeLogRepository;
+
+    @Autowired
+    private PostImageService postImageService; 
 
     // Get all posts ordered by creation date (newest first)
     public List<PostDTO> getAllPosts() {
@@ -69,7 +72,7 @@ public class PostService {
 
     // 조회수순 정렬
     public List<PostDTO> getByBoardIdOrderByViewCount(Long boardId) {
-        List<Post> posts = postRepository.findByBoardIdOrderByViewCountDesc(boardId);
+        List<Post> posts = postRepository.findByBoardIdAndIsBlindedFalseOrderByViewCountDesc(boardId);
         return convertToPostDTOList(posts);
     }
 
@@ -120,6 +123,11 @@ public class PostService {
     public void deletePost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
+
+        // Delete all images associated with this post (from S3 and database)
+        postImageService.deleteImagesByPostId(id);
+
+        // Delete the post
         postRepository.delete(post);
     }
 
@@ -131,7 +139,7 @@ public class PostService {
 
     // Get posts by board ID
     public List<PostDTO> getPostsByBoardId(Long boardId) {
-        List<Post> posts = postRepository.findByBoardIdOrderByCreatedAtDesc(boardId);
+        List<Post> posts = postRepository.findByBoardIdAndIsBlindedFalseOrderByCreatedAtDesc(boardId);
         return convertToPostDTOList(posts);
     }
 
@@ -155,113 +163,206 @@ public class PostService {
         return "Unknown User";
     }
 
-    // Increment view count with IP-based duplicate prevention
+    // 조회수 증가 (IP/사용자 기반 중복 방지)
     public void incrementViewCount(Long postId, Long userId, String ipAddress) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
 
-        // Check if this user/IP has viewed this post in the last 24 hours
+        // 24시간 이내 동일 사용자/IP의 조회 이력 확인
         LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
         boolean hasViewed = false;
 
         if (userId != null) {
-            // Check by user ID (for logged-in users)
-            Optional<PostViewLog> userViewLog = postViewLogRepository
+            // 로그인 사용자: userId로 중복 조회 확인
+            List<PostViewLog> userViewLogs = postViewLogRepository
                     .findByPostIdAndUserIdAndViewedAtAfter(postId, userId, oneDayAgo);
-            hasViewed = userViewLog.isPresent();
+            hasViewed = !userViewLogs.isEmpty();
         } else if (ipAddress != null) {
-            // Check by IP address (for non-logged-in users)
-            Optional<PostViewLog> ipViewLog = postViewLogRepository
+            // 비로그인 사용자: IP 주소로 중복 조회 확인
+            List<PostViewLog> ipViewLogs = postViewLogRepository
                     .findByPostIdAndIpAddressAndViewedAtAfter(postId, ipAddress, oneDayAgo);
-            hasViewed = ipViewLog.isPresent();
+            hasViewed = !ipViewLogs.isEmpty();
         }
 
-        // Only increment if not viewed recently
+        // 최근 조회 이력이 없을 때만 조회수 증가
         if (!hasViewed) {
             post.setViewCount(post.getViewCount() + 1);
             postRepository.save(post);
 
-            // Log this view
+            // 조회 로그 저장
             PostViewLog viewLog = new PostViewLog(postId, userId, ipAddress);
             postViewLogRepository.save(viewLog);
         }
     }
 
-    // Legacy method for backward compatibility
+    // 하위 호환용 조회수 증가 메서드
     public void incrementViewCount(Long id) {
         incrementViewCount(id, null, null);
     }
 
-    // Increment like count with IP-based duplicate prevention
+    // 좋아요 (토글 + 싫어요와 상호배타적)
     public void incrementLikeCount(Long postId, Long userId, String ipAddress) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
 
-        // Check if this user/IP has liked this post in the last 24 hours
-        LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
-        boolean hasLiked = false;
-
         if (userId != null) {
-            // Check by user ID (for logged-in users)
-            Optional<PostLikeLog> userLikeLog = postLikeLogRepository
-                    .findByPostIdAndUserIdAndLikedAtAfter(postId, userId, oneDayAgo);
-            hasLiked = userLikeLog.isPresent();
-        } else if (ipAddress != null) {
-            // Check by IP address (for non-logged-in users)
-            Optional<PostLikeLog> ipLikeLog = postLikeLogRepository
-                    .findByPostIdAndIpAddressAndLikedAtAfter(postId, ipAddress, oneDayAgo);
-            hasLiked = ipLikeLog.isPresent();
-        }
+            // 1. 기존 좋아요 확인
+            List<PostLikeLog> userLikeLogs = postLikeLogRepository
+                    .findByPostIdAndUserId(postId, userId);
 
-        // Only increment if not liked recently
-        if (!hasLiked) {
+            if (!userLikeLogs.isEmpty()) {
+                // 이미 좋아요를 눌렀으면 → 취소 (토글)
+                for (PostLikeLog likeLog : userLikeLogs) {
+                    postLikeLogRepository.delete(likeLog);
+                }
+                post.setLikeCount(Math.max(0, post.getLikeCount() - 1));
+                postRepository.save(post);
+                return; // 종료
+            }
+
+            // 2. 기존 싫어요 확인 (상호배타)
+            List<PostDislikeLog> userDislikeLogs = postDislikeLogRepository
+                    .findByPostIdAndUserId(postId, userId);
+            if (!userDislikeLogs.isEmpty()) {
+                // 싫어요가 있으면 → 싫어요 취소
+                for (PostDislikeLog dislikeLog : userDislikeLogs) {
+                    postDislikeLogRepository.delete(dislikeLog);
+                }
+                post.setDislikeCount(Math.max(0, post.getDislikeCount() - 1));
+            }
+
+            // 3. 좋아요 추가
             post.setLikeCount(post.getLikeCount() + 1);
             postRepository.save(post);
+            PostLikeLog likeLog = new PostLikeLog(postId, userId, ipAddress);
+            postLikeLogRepository.save(likeLog);
 
-            // Log this like
+        } else if (ipAddress != null) {
+            // 비로그인 사용자 (IP 기반) - 동일한 패턴
+            List<PostLikeLog> ipLikeLogs = postLikeLogRepository
+                    .findByPostIdAndIpAddress(postId, ipAddress);
+
+            if (!ipLikeLogs.isEmpty()) {
+                // 이미 좋아요 → 취소
+                for (PostLikeLog likeLog : ipLikeLogs) {
+                    postLikeLogRepository.delete(likeLog);
+                }
+                post.setLikeCount(Math.max(0, post.getLikeCount() - 1));
+                postRepository.save(post);
+                return;
+            }
+
+            List<PostDislikeLog> ipDislikeLogs = postDislikeLogRepository
+                    .findByPostIdAndIpAddress(postId, ipAddress);
+            if (!ipDislikeLogs.isEmpty()) {
+                for (PostDislikeLog dislikeLog : ipDislikeLogs) {
+                    postDislikeLogRepository.delete(dislikeLog);
+                }
+                post.setDislikeCount(Math.max(0, post.getDislikeCount() - 1));
+            }
+
+            post.setLikeCount(post.getLikeCount() + 1);
+            postRepository.save(post);
             PostLikeLog likeLog = new PostLikeLog(postId, userId, ipAddress);
             postLikeLogRepository.save(likeLog);
         }
     }
 
-    // Legacy method for backward compatibility
+    // 하위 호환용 좋아요 증가 메서드
     public void incrementLikeCount(Long id) {
         incrementLikeCount(id, null, null);
     }
 
+    // 싫어요 (토글 + 좋아요와 상호배타적)
     public void incrementDislikeCount(Long postId, Long userId, String ipAddress) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
 
-        // Check if this user/IP has disliked this post in the last 24 hours
-        LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
-        boolean hasDisliked = false;
-
         if (userId != null) {
-            // Check by user ID (for logged-in users)
-            Optional<PostDislikeLog> userDislikeLog = postDislikeLogRepository
-                    .findByPostIdAndUserIdAndDislikedAtAfter(postId, userId, oneDayAgo);
-            hasDisliked = userDislikeLog.isPresent();
-        } else if (ipAddress != null) {
-            // Check by IP address (for non-logged-in users)
-            Optional<PostDislikeLog> ipDislikeLog = postDislikeLogRepository
-                    .findByPostIdAndIpAddressAndDislikedAtAfter(postId, ipAddress, oneDayAgo);
-            hasDisliked = ipDislikeLog.isPresent();
-        }
+            // 1. 기존 싫어요 확인
+            List<PostDislikeLog> userDislikeLogs = postDislikeLogRepository
+                    .findByPostIdAndUserId(postId, userId);
 
-        // Only increment if not disliked recently
-        if (!hasDisliked) {
+            if (!userDislikeLogs.isEmpty()) {
+                // 이미 싫어요를 눌렀으면 → 취소 (토글)
+                for (PostDislikeLog dislikeLog : userDislikeLogs) {
+                    postDislikeLogRepository.delete(dislikeLog);
+                }
+                post.setDislikeCount(Math.max(0, post.getDislikeCount() - 1));
+                postRepository.save(post);
+                return; // 종료
+            }
+
+            // 2. 기존 좋아요 확인 (상호배타)
+            List<PostLikeLog> userLikeLogs = postLikeLogRepository
+                    .findByPostIdAndUserId(postId, userId);
+            if (!userLikeLogs.isEmpty()) {
+                // 좋아요가 있으면 → 좋아요 취소
+                for (PostLikeLog likeLog : userLikeLogs) {
+                    postLikeLogRepository.delete(likeLog);
+                }
+                post.setLikeCount(Math.max(0, post.getLikeCount() - 1));
+            }
+
+            // 3. 싫어요 추가
             post.setDislikeCount(post.getDislikeCount() + 1);
-            post.setUpdatedAt(post.getUpdatedAt());
             postRepository.save(post);
+            PostDislikeLog dislikeLog = new PostDislikeLog(postId, userId, ipAddress);
+            postDislikeLogRepository.save(dislikeLog);
 
-            // Log this dislike
+        } else if (ipAddress != null) {
+            // 비로그인 사용자 (IP 기반) - 동일한 패턴
+            List<PostDislikeLog> ipDislikeLogs = postDislikeLogRepository
+                    .findByPostIdAndIpAddress(postId, ipAddress);
+
+            if (!ipDislikeLogs.isEmpty()) {
+                // 이미 싫어요 → 취소
+                for (PostDislikeLog dislikeLog : ipDislikeLogs) {
+                    postDislikeLogRepository.delete(dislikeLog);
+                }
+                post.setDislikeCount(Math.max(0, post.getDislikeCount() - 1));
+                postRepository.save(post);
+                return;
+            }
+
+            List<PostLikeLog> ipLikeLogs = postLikeLogRepository
+                    .findByPostIdAndIpAddress(postId, ipAddress);
+            if (!ipLikeLogs.isEmpty()) {
+                for (PostLikeLog likeLog : ipLikeLogs) {
+                    postLikeLogRepository.delete(likeLog);
+                }
+                post.setLikeCount(Math.max(0, post.getLikeCount() - 1));
+            }
+
+            post.setDislikeCount(post.getDislikeCount() + 1);
+            postRepository.save(post);
             PostDislikeLog dislikeLog = new PostDislikeLog(postId, userId, ipAddress);
             postDislikeLogRepository.save(dislikeLog);
         }
     }
 
+    // 하위 호환용 싫어요 증가 메서드
     public void incrementDislikeCount(Long id) {
         incrementDislikeCount(id, null, null);
+    }
+
+    // 사용자의 현재 반응 상태 조회
+    public String getUserReaction(Long postId, Long userId, String ipAddress) {
+        if (userId != null) {
+            if (!postLikeLogRepository.findByPostIdAndUserId(postId, userId).isEmpty()) {
+                return "like";
+            }
+            if (!postDislikeLogRepository.findByPostIdAndUserId(postId, userId).isEmpty()) {
+                return "dislike";
+            }
+        } else if (ipAddress != null) {
+            if (!postLikeLogRepository.findByPostIdAndIpAddress(postId, ipAddress).isEmpty()) {
+                return "like";
+            }
+            if (!postDislikeLogRepository.findByPostIdAndIpAddress(postId, ipAddress).isEmpty()) {
+                return "dislike";
+            }
+        }
+        return "none";
     }
 }

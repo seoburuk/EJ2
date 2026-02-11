@@ -3,6 +3,7 @@ package com.ej2.repository;
 import com.ej2.model.CommentLikeLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,4 +19,8 @@ public interface CommentLikeLogRepository extends JpaRepository<CommentLikeLog, 
 
     // Get all likes for a comment by user IDs (for checking if current user liked)
     List<CommentLikeLog> findByCommentIdIn(List<Long> commentIds);
+
+    // Delete all like logs for a comment (for hard delete)
+    @Transactional
+    void deleteByCommentId(Long commentId);
 }

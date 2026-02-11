@@ -66,13 +66,15 @@ function BoardListPage() {
               className="board-card"
               onClick={() => handleBoardClick(board)}
             >
-              <div className="board-icon">{getBoardIcon(board.code)}</div>
-              <div className="board-info">
-                <h3 className="board-name">
-                  {board.name}
-                  {board.isAnonymous && <span className="anonymous-badge">匿名</span>}
-                </h3>
-                <p className="board-description">{board.description}</p>
+              <div className="board-card-left">
+                <div className="board-icon">{getBoardIcon(board.code)}</div>
+                <div className="board-info">
+                  <h3 className="board-name">
+                    {board.name}
+                    {board.isAnonymous && <span className="anonymous-badge">匿名</span>}
+                  </h3>
+                  <p className="board-description">{board.description}</p>
+                </div>
               </div>
               <div className="board-arrow">→</div>
             </div>

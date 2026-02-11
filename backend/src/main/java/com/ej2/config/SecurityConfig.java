@@ -64,7 +64,7 @@ public class SecurityConfig {
             .authenticationEntryPoint((request, response, authException) -> {
                 String origin = response.getHeader("Origin");
                 if (origin != null && 
-                    (origin.equals("http://localhost:3000") || origin.equals("http://52.79.204.202:3000"))) {
+                    (origin.equals("http://localhost") || origin.equals("http://elasticjapan.duckdns.org"))) {
                     response.setHeader("Access-Control-Allow-Origin", origin);
                     response.setHeader("Access-Control-Allow-Credentials", "true");
                 }
@@ -82,8 +82,8 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
 
         // 로컬 + 배포주소
-        config.addAllowedOriginPattern("http://localhost:3000");
-        config.addAllowedOriginPattern("http://52.79.204.202:3000");
+        config.addAllowedOriginPattern("http://localhost");
+        config.addAllowedOriginPattern("http://elasticjapan.duckdns.org");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         

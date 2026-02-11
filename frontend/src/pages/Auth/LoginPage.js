@@ -13,6 +13,9 @@ function LoginPage() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
+  const [resendSuccess, setResendSuccess] = useState(false);
   const navigate = useNavigate();
 
   // フォーム入力変更ハンドラー
@@ -52,7 +55,16 @@ function LoginPage() {
       }
     } catch (err) {
       if (err.response && err.response.data) {
-        setError(err.response.data.message || 'ログインに失敗しました');
+        const errorMsg = err.response.data.message;
+        const errorCode = err.response.data.errorCode;
+
+        if (errorCode === 'EMAIL_NOT_VERIFIED' || errorMsg === 'EMAIL_NOT_VERIFIED') {
+          setError('メールアドレスが未認証です。受信トレイをご確認ください。');
+          setShowResend(true);
+          setUnverifiedEmail(err.response.data.email || formData.username);
+        } else {
+          setError(errorMsg || 'ログインに失敗しました');
+        }
       } else {
         setError('サーバーとの通信に失敗しました');
       }
@@ -61,14 +73,49 @@ function LoginPage() {
     }
   };
 
+  // メール認証の再送信ハンドラー
+  const handleResendVerification = async () => {
+    try {
+      const response = await axios.post('/api/auth/resend-verification', {
+        email: unverifiedEmail
+      });
+
+      if (response.data.success) {
+        setResendSuccess(true);
+        setError('');
+        setTimeout(() => setResendSuccess(false), 5000);
+      }
+    } catch (err) {
+      setError('認証メールの再送信に失敗しました');
+    }
+  };
+
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2 className="auth-title">Welcome Back 👊</h2>
+        <h2 className="auth-title">エブリージャパン</h2>
 
         {error && (
           <div className="auth-error">
             {error}
+          </div>
+        )}
+
+        {showResend && (
+          <div className="resend-verification">
+            <button
+              onClick={handleResendVerification}
+              className="resend-button"
+              type="button"
+            >
+              認証メールを再送信
+            </button>
+          </div>
+        )}
+
+        {resendSuccess && (
+          <div className="success-message">
+            認証メールを再送信しました。受信トレイをご確認ください。
           </div>
         )}
 
@@ -106,19 +153,16 @@ function LoginPage() {
             className="auth-button"
             disabled={loading}
           >
-            {loading ? 'Signing In...' : 'Sign In'}
+            {loading ? 'ログイン中...' : 'ログイン'}
           </button>
         </form>
 
         <div className="auth-links">
-          <a href="/register">Sign Up</a>
+          <a href="/register">新規会員登録</a>
           <span style={{ margin: '0 8px', color: '#ccc' }}>|</span>
           <a href="/find-account">ID / パスワードを探す</a>
         </div>
 
-        <div className="concept-links">
-          view concept for <a href="/concept/mobile">mobile</a> or for <a href="/concept/desktop">desktop</a>
-        </div>
       </div>
     </div>
   );

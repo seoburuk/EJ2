@@ -29,7 +29,7 @@
 
 .boards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 
@@ -39,7 +39,8 @@
   padding: 24px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: space-between;
+  gap: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(92, 107, 192, 0.1);
@@ -52,10 +53,18 @@
   border-color: #5c6bc0;
 }
 
+.board-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
 .board-icon {
-  font-size: 48px;
-  min-width: 64px;
-  height: 64px;
+  font-size: 40px;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,45 +73,49 @@
 }
 
 .board-info {
-  flex: 1;
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .board-name {
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 700;
   color: #212121;
-  margin: 0 0 8px 0;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .anonymous-badge {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: white;
   background: linear-gradient(135deg, #7986cb 0%, #5c6bc0 100%);
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .board-description {
-  font-size: 14px;
-  color: #757575;
+  font-size: 13px;
+  color: #9e9e9e;
   margin: 0;
   line-height: 1.5;
 }
 
 .board-arrow {
-  font-size: 24px;
-  color: #5c6bc0;
+  font-size: 22px;
+  color: #bdbdbd;
   font-weight: bold;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .board-card:hover .board-arrow {
   transform: translateX(4px);
+  color: #5c6bc0;
 }
 
 .loading {
@@ -114,7 +127,13 @@
   color: #5c6bc0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
+  .boards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
   .board-list-page {
     padding: 20px 10px;
   }
@@ -127,13 +146,17 @@
     grid-template-columns: 1fr;
   }
 
+  .board-card {
+    padding: 20px;
+  }
+
   .board-icon {
-    font-size: 36px;
-    min-width: 52px;
-    height: 52px;
+    font-size: 32px;
+    width: 48px;
+    height: 48px;
   }
 
   .board-name {
-    font-size: 18px;
+    font-size: 16px;
   }
 }
