@@ -21,6 +21,9 @@ import AdminBoardsPage from './pages/Admin/AdminBoardsPage';
 import AdminReportsPage from './pages/Admin/AdminReportsPage';
 import './App.css';
 
+// チャットポップアップウィンドウの参照（連打防止）
+let chatWindowRef = null;
+
 function NavBar() {
   const [boards, setBoards] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -166,16 +169,16 @@ function NavBar() {
           <li className="nav-item">
             <a href="/chat" className="nav-link" onClick={(e) => {
               e.preventDefault();
-              window.open('/chat', 'ej2-chat', 'width=500,height=700,scrollbars=yes,resizable=yes');
+              if (chatWindowRef && !chatWindowRef.closed) {
+                chatWindowRef.focus();
+                return;
+              }
+              chatWindowRef = window.open('/chat', 'ej2-chat', 'width=500,height=700,scrollbars=yes,resizable=yes');
             }}>チャット</a>
           </li>
           <li className="nav-item">
             <Link to="/timetable" className="nav-link">時間割</Link>
           </li>
-          <li className="nav-item">
-            <Link to="/users" className="nav-link">ユーザー</Link>
-          </li>
-
           {/* 管理者メニュー（ADMIN/SUPER_ADMIN表示） */}
           {user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
             <li className="nav-item">

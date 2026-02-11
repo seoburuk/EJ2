@@ -66,6 +66,7 @@ public class ChatController {
 
         boolean useAnonymous = true;
         String userName = null;
+        String sessionToken = null;
 
         if (body != null) {
             Object anon = body.get("useAnonymous");
@@ -76,6 +77,10 @@ public class ChatController {
             if (name instanceof String) {
                 userName = (String) name;
             }
+            Object token = body.get("sessionToken");
+            if (token instanceof String) {
+                sessionToken = (String) token;
+            }
         }
 
         String nickname;
@@ -84,8 +89,8 @@ public class ChatController {
             nickname = userName.trim();
             chatService.incrementCurrentUsers(roomId);
         } else {
-            // Anonymous
-            nickname = chatService.assignNickname(roomId);
+            // Anonymous（セッショントークンで冪等性保証）
+            nickname = chatService.assignNickname(roomId, sessionToken);
         }
 
         Map<String, String> result = new HashMap<String, String>();
@@ -118,6 +123,9 @@ public class ChatController {
         // Store in WebSocket session for disconnect handling
         headerAccessor.getSessionAttributes().put("nickname", message.getSenderNickname());
         headerAccessor.getSessionAttributes().put("roomId", roomId);
+
+        // WebSocket接続成功時にcurrentUsersを増加（REST/WebSocketライフサイクル一致）
+        chatService.incrementCurrentUsers(roomId);
 
         return chatService.saveMessage(message);
     }

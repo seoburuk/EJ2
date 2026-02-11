@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Transactional
@@ -24,6 +25,10 @@ public class ChatService {
 
     @Autowired
     private ChatMessageRepository chatMessageRepository;
+
+    // セッショントークン→ニックネームのキャッシュ（連打による重複割り当て防止）
+    // Key: "roomId:sessionToken", Value: 割り当て済みニックネーム
+    private final ConcurrentHashMap<String, String> sessionNicknameCache = new ConcurrentHashMap<String, String>();
 
     // アプリ起動時にグローバルルームを自動作成
     @PostConstruct
@@ -67,6 +72,29 @@ public class ChatService {
         return reversed;
     }
 
+    // セッショントークン付きニックネーム割り当て（冪等性保証）
+    // 同じsessionTokenで再リクエスト → カウンター増加なしで既存ニックネーム返却
+    public String assignNickname(Long roomId, String sessionToken) {
+        if (sessionToken != null && !sessionToken.trim().isEmpty()) {
+            String cacheKey = roomId + ":" + sessionToken;
+            String existing = sessionNicknameCache.get(cacheKey);
+            if (existing != null) {
+                return existing;
+            }
+            String nickname = assignNickname(roomId);
+            sessionNicknameCache.put(cacheKey, nickname);
+            return nickname;
+        }
+        return assignNickname(roomId);
+    }
+
+    // セッションキャッシュのクリーンアップ（退出時に呼び出し）
+    public void clearSessionNickname(Long roomId, String sessionToken) {
+        if (sessionToken != null) {
+            sessionNicknameCache.remove(roomId + ":" + sessionToken);
+        }
+    }
+
     // Assign sequential anonymous nickname: 匿名1, 匿名2, 匿名3...
     // 楽観的ロックで同時実行の競合を防止（最大3回リトライ）
     public String assignNickname(Long roomId) {
@@ -89,7 +117,7 @@ public class ChatService {
             ChatRoom room = optRoom.get();
             int nextNumber = room.getNicknameCounter() + 1;
             room.setNicknameCounter(nextNumber);
-            room.setCurrentUsers(room.getCurrentUsers() + 1);
+            // currentUsersはWebSocket JOIN時に増加させる（REST/WebSocketライフサイクル不一致防止）
             chatRoomRepository.save(room);
             return "匿名" + nextNumber;
         }
@@ -149,6 +177,10 @@ public class ChatService {
             if (count <= 0) {
                 room.setNicknameCounter(0);
                 room.setCurrentUsers(0);
+
+                String roomPrefix = roomId + ":";
+                sessionNicknameCache.entrySet().removeIf(entry ->
+                        entry.getKey().startsWith(roomPrefix));
             }
 
             chatRoomRepository.save(room);

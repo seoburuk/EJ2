@@ -17,18 +17,18 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByTitleContainingOrderByCreatedAtDesc(String keyword);
 
-    List<Post> findByBoardIdOrderByCreatedAtDesc(Long boardId);
+    List<Post> findByBoardIdAndIsBlindedFalseOrderByCreatedAtDesc(Long boardId);
 
     List<Post> findAllByOrderByViewCountDesc();
 
-    List<Post> findByBoardIdOrderByViewCountDesc(Long boardId);
+    List<Post> findByBoardIdAndIsBlindedFalseOrderByViewCountDesc(Long boardId);
 
-    @Query(value = "select p.* from posts p left join post_like_logs ll on p.id = ll.post_id and ll.liked_at >= date_sub(now(), interval 1 day) where p.board_id = :boardId group by p.id order by count(ll.id) desc", nativeQuery = true)
+    @Query(value = "select p.* from posts p left join post_like_logs ll on p.id = ll.post_id and ll.liked_at >= date_sub(now(), interval 1 day) where p.board_id = :boardId and p.is_blinded = 0 group by p.id order by count(ll.id) desc", nativeQuery = true)
     List<Post> findAllOrderByDayLikeCount(@Param("boardId") Long boardId);
 
-    @Query(value = "select p.* from posts p left join post_like_logs ll on p.id = ll.post_id and ll.liked_at >= date_sub(now(), interval 7 day) where p.board_id = :boardId group by p.id order by count(ll.id) desc", nativeQuery = true)
+    @Query(value = "select p.* from posts p left join post_like_logs ll on p.id = ll.post_id and ll.liked_at >= date_sub(now(), interval 7 day) where p.board_id = :boardId and p.is_blinded = 0 group by p.id order by count(ll.id) desc", nativeQuery = true)
     List<Post> findAllOrderByWeekLikeCount(@Param("boardId") Long boardId);
 
-    @Query(value = "select p.* from posts p left join post_like_logs ll on p.id = ll.post_id and ll.liked_at >= date_sub(now(), interval 30 day) where p.board_id = :boardId group by p.id order by count(ll.id) desc", nativeQuery = true)
+    @Query(value = "select p.* from posts p left join post_like_logs ll on p.id = ll.post_id and ll.liked_at >= date_sub(now(), interval 30 day) where p.board_id = :boardId and p.is_blinded = 0 group by p.id order by count(ll.id) desc", nativeQuery = true)
     List<Post> findAllOrderByMonthLikeCount(@Param("boardId") Long boardId);
 }

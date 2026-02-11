@@ -31,8 +31,6 @@ function MainPage() {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      console.log('Logged in user:', parsedUser);
-      console.log('User role:', parsedUser.role);
       setUser(parsedUser);
     }
   };
@@ -234,52 +232,6 @@ function MainPage() {
             <span className="chat-shortcut-arrow">↗</span>
           </div>
 
-          {/* Debug Info - 開発用 */}
-          <div style={{
-            background: user ? '#fff3cd' : '#f8d7da',
-            padding: '10px',
-            marginBottom: '10px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            border: user ? '1px solid #ffc107' : '1px solid #f5c6cb'
-          }}>
-            <strong>Debug Info:</strong><br/>
-            {user ? (
-              <>
-                Username: {user.username || 'N/A'}<br/>
-                Name: {user.name || 'N/A'}<br/>
-                Role: {user.role || 'N/A'}<br/>
-                Is ADMIN: {user.role === 'ADMIN' ? 'YES' : 'NO'}
-              </>
-            ) : (
-              <>
-                User: NULL (Not logged in or localStorage empty)<br/>
-                localStorage 'user': {localStorage.getItem('user') ? 'EXISTS' : 'EMPTY'}
-              </>
-            )}
-            <button
-              onClick={() => {
-                const stored = localStorage.getItem('user');
-                console.log('Raw localStorage:', stored);
-                if (stored) {
-                  const parsed = JSON.parse(stored);
-                  console.log('Parsed user:', parsed);
-                  alert('Check console for details');
-                } else {
-                  alert('No user in localStorage');
-                }
-              }}
-              style={{
-                marginTop: '8px',
-                padding: '4px 8px',
-                fontSize: '11px',
-                cursor: 'pointer'
-              }}
-            >
-              Check localStorage
-            </button>
-          </div>
-
           {/* Admin Shortcut - ADMINのみ表示 */}
           {user && user.role === 'ADMIN' && (
             <div className="admin-shortcut-section" onClick={() => navigate('/admin')}>
@@ -295,7 +247,7 @@ function MainPage() {
           )}
 
           <div className="popular-section-eta">
-            <h3 className="sidebar-title-eta">인기글</h3>
+            <h3 className="sidebar-title-eta">人気トピック</h3>
             <div className="popular-list-eta">
               {popularPosts.map((post, index) => (
                 <div
@@ -309,9 +261,7 @@ function MainPage() {
                     <div className="popular-title-eta">{post.title}</div>
                     <div className="popular-stats-eta">
                       👁 {post.viewCount || 0}
-                      <span className="stat-separator"> / </span>
                       👍 {post.likeCount || 0}
-                      <span className="stat-separator"> / </span>
                       💬 {post.commentCount || 0}
                     </div>
                   </div>

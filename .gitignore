@@ -46,3 +46,13 @@ dist/
 ### Cache ###
 .cache/
 *.log
+
+### Environment Variables ###
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+### AWS Credentials ###
+aws-credentials.properties

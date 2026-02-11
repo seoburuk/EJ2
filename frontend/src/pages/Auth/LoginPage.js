@@ -64,7 +64,7 @@ function LoginPage() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2 className="auth-title">Welcome Back 👊</h2>
+        <h2 className="auth-title">エブリージャパン</h2>
 
         {error && (
           <div className="auth-error">
@@ -106,19 +106,16 @@ function LoginPage() {
             className="auth-button"
             disabled={loading}
           >
-            {loading ? 'Signing In...' : 'Sign In'}
+            {loading ? 'ログイン中...' : 'ログイン'}
           </button>
         </form>
 
         <div className="auth-links">
-          <a href="/register">Sign Up</a>
+          <a href="/register">新規会員登録</a>
           <span style={{ margin: '0 8px', color: '#ccc' }}>|</span>
           <a href="/find-account">ID / パスワードを探す</a>
         </div>
 
-        <div className="concept-links">
-          view concept for <a href="/concept/mobile">mobile</a> or for <a href="/concept/desktop">desktop</a>
-        </div>
       </div>
     </div>
   );

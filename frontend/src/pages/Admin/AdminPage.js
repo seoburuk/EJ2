@@ -106,7 +106,7 @@ function AdminPage() {
         axios.get('/api/admin/dashboard/weekly', { withCredentials: true }),
         axios.get('/api/admin/dashboard/activity', { withCredentials: true }),
         axios.get('/api/admin/dashboard/board-stats', { withCredentials: true }),
-        axios.get('http://localhost:8080/api/admin/reports/stats', { withCredentials: true })
+        axios.get('/api/admin/reports/stats', { withCredentials: true })
       ]);
 
       setStats(statsRes.data);

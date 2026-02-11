@@ -20,7 +20,7 @@ public class AnonymousIdGenerator {
      */
     public static String generateAnonymousId(Long userId, Long postId) {
         if (userId == null || postId == null) {
-            return "익명";
+            return "匿名";
         }
 
         try {
@@ -40,12 +40,12 @@ public class AnonymousIdGenerator {
             // Map to a number between 1 and 999
             int anonymousNumber = (hashValue % 999) + 1;
 
-            return "익명" + anonymousNumber;
+            return "匿名" + anonymousNumber;
         } catch (NoSuchAlgorithmException e) {
             // Fallback to simple hash if SHA-256 is not available
             int simpleHash = (userId.toString() + postId.toString()).hashCode();
             int anonymousNumber = (Math.abs(simpleHash) % 999) + 1;
-            return "익명" + anonymousNumber;
+            return "匿名" + anonymousNumber;
         }
     }
 
@@ -76,7 +76,7 @@ public class AnonymousIdGenerator {
 
             // Map user to their sequential anonymous ID
             int sequentialNumber = assignedNumbers.get(hashBasedId);
-            idMap.put(userId, "익명" + sequentialNumber);
+            idMap.put(userId, "匿名" + sequentialNumber);
         }
 
         return idMap;

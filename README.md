@@ -29,6 +29,7 @@
 ### 💬 커뮤니티
 - 게시판 (자유게시판, 학과별 게시판 등)
 - 게시글 작성, 수정, 삭제
+- **📸 이미지 업로드** (AWS S3, 게시글당 최대 5장)
 - 댓글 시스템
 - 실시간 채팅방
 - 신고 시스템
@@ -50,6 +51,7 @@
 | Apache Tomcat | 9 | 서블릿 컨테이너 |
 | Maven | - | 빌드 도구 |
 | HikariCP | - | 커넥션 풀 |
+| AWS SDK for S3 | 1.12.529 | 클라우드 스토리지 (이미지 업로드) |
 
 ### Frontend
 | 기술 | 버전 | 용도 |
@@ -70,6 +72,7 @@
 | Docker | 컨테이너화 |
 | Docker Compose | 멀티 컨테이너 오케스트레이션 |
 | Nginx | 프론트엔드 웹 서버 (프로덕션) |
+| AWS S3 | 이미지 스토리지 |
 
 ## 📁 프로젝트 구조
 
@@ -94,20 +97,26 @@ EJ2/
 │   │   │   │   ├── RankingController.java
 │   │   │   │   ├── ReportController.java
 │   │   │   │   ├── AdminController.java
-│   │   │   │   └── FileUploadController.java
+│   │   │   │   ├── FileUploadController.java
+│   │   │   │   └── PostImageController.java    # 이미지 업로드 API
 │   │   │   ├── model/                # JPA 엔티티
 │   │   │   │   ├── User.java
 │   │   │   │   ├── Timetable.java
 │   │   │   │   ├── TimetableCourse.java
 │   │   │   │   ├── Board.java
 │   │   │   │   ├── Post.java
+│   │   │   │   ├── PostImage.java              # 게시글 이미지 엔티티
 │   │   │   │   ├── Comment.java
 │   │   │   │   ├── ChatRoom.java
 │   │   │   │   └── Report.java
 │   │   │   ├── repository/           # JPA 리포지토리
 │   │   │   ├── service/              # 비즈니스 로직
+│   │   │   │   ├── S3Service.java         # AWS S3 업로드/삭제
+│   │   │   │   └── PostImageService.java  # 이미지 비즈니스 로직
 │   │   │   ├── dto/                  # 데이터 전송 객체
-│   │   │   └── converter/            # JPA 커스텀 컨버터
+│   │   │   ├── converter/            # JPA 커스텀 컨버터
+│   │   │   └── config/
+│   │   │       └── S3Config.java          # AWS S3 설정
 │   │   ├── resources/
 │   │   └── webapp/WEB-INF/
 │   │       └── web.xml               # 서블릿 설정
@@ -144,9 +153,13 @@ EJ2/
 │   ├── nginx.conf
 │   └── package.json
 ├── docker-compose.yml                # Docker Compose 설정
+├── .env.example                      # 환경변수 템플릿 (AWS 설정)
 ├── README.md                         # 프로젝트 문서
 ├── CLAUDE.md                         # AI 어시스턴트용 컨텍스트
+├── AWS_S3_설정_가이드.md             # AWS S3 설정 가이드
 └── docs/                             # 추가 문서
+    ├── 이미지_업로드_가이드_초보자용.md  # 초보자용 이미지 업로드 가이드
+    └── IMAGE_UPLOAD_GUIDE.md          # 이미지 업로드 기술 문서 (일본어)
 ```
 
 ## 🚀 시작하기
@@ -171,17 +184,32 @@ git clone <repository-url>
 cd EJ2
 ```
 
-2. **모든 서비스 실행**
+2. **환경 변수 설정 (이미지 업로드 기능 사용 시)**
+```bash
+# .env 파일 생성
+cp .env.example .env
+
+# .env 파일을 열어 AWS S3 자격 증명 입력
+# AWS_S3_ACCESS_KEY=여러분의_액세스_키
+# AWS_S3_SECRET_KEY=여러분의_비밀_키
+# AWS_S3_BUCKET_NAME=ej2-post-images
+# AWS_S3_REGION=ap-northeast-2
+```
+
+> **참고**: AWS S3 설정이 없어도 기본 기능은 작동합니다. 이미지 업로드만 비활성화됩니다.
+> 자세한 설정 방법은 `AWS_S3_설정_가이드.md` 또는 `docs/이미지_업로드_가이드_초보자용.md`를 참조하세요.
+
+3. **모든 서비스 실행**
 ```bash
 docker-compose up --build
 ```
 
-3. **애플리케이션 접속**
+4. **애플리케이션 접속**
    - 🌐 **Frontend**: http://localhost:3000
    - 🔧 **Backend API**: http://localhost:8080/ej2/api
    - 🗄️ **MariaDB**: localhost:3306
 
-4. **서비스 중지**
+5. **서비스 중지**
 ```bash
 # 컨테이너 중지
 docker-compose down
@@ -265,6 +293,13 @@ npm start
 | POST | `/api/posts` | 게시글 작성 |
 | PUT | `/api/posts/{id}` | 게시글 수정 |
 | DELETE | `/api/posts/{id}` | 게시글 삭제 |
+
+### 이미지 업로드 API (`/api/posts/{postId}/images`)
+| Method | Endpoint | 설명 |
+|--------|----------|------|
+| POST | `/api/posts/{postId}/images` | 이미지 업로드 (최대 5장) |
+| GET | `/api/posts/{postId}/images` | 게시글의 이미지 목록 조회 |
+| DELETE | `/api/posts/{postId}/images/{imageId}` | 특정 이미지 삭제 |
 
 ### 댓글 API (`/api/comments`)
 | Method | Endpoint | 설명 |
@@ -474,6 +509,9 @@ kill -9 <PID>
 ```
 
 ### 추가 문서
+- 📄 `AWS_S3_설정_가이드.md` - AWS S3 이미지 업로드 설정 가이드
+- 📄 `docs/이미지_업로드_가이드_초보자용.md` - 초보자를 위한 이미지 업로드 완벽 가이드
+- 📄 `docs/IMAGE_UPLOAD_GUIDE.md` - 이미지 업로드 기술 문서 (일본어)
 - 📄 `docs/0119_1_troubleshooting_guide.md` - 상세 트러블슈팅 가이드
 - 📄 `docs/0118_1_BEGINNER_GUIDE.md` - 초보자를 위한 상세 가이드
 - 📄 `CLAUDE.md` - AI 어시스턴트용 프로젝트 컨텍스트

@@ -917,103 +917,10 @@
   color: white;
 }
 
-/* 報告詳細モーダル専用スタイル */
-.modal-content {
-  background: white;
-  border-radius: 24px;
-  width: 100%;
-  max-width: 800px;
-  max-height: calc(100vh - 80px);
-  overflow-y: auto;
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4),
-              0 0 1px rgba(0, 0, 0, 0.1),
-              inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  animation: modalPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  transform-origin: center;
-  padding: 40px 48px;
-}
+/* 報告詳細モーダル専用スタイル - メインスタイルは下部に移動 */
 
-.modal-content h2 {
-  margin: 0 0 24px 0;
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--admin-dark);
-  padding-bottom: 16px;
-  border-bottom: 3px solid #e5e7eb;
-}
-
-.detail-section {
-  background: #f8fafc;
-  padding: 20px 24px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  border-left: 4px solid var(--admin-primary);
-}
-
-.detail-section h3 {
-  margin-top: 0;
-  margin-bottom: 12px;
-  color: var(--admin-dark);
-  font-size: 16px;
-}
-
-.detail-section p {
-  margin: 8px 0;
-  color: #64748b;
-  line-height: 1.6;
-}
-
-.detail-section p strong {
-  color: var(--admin-dark);
-  font-weight: 600;
-}
-
-.admin-note-input {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  font-size: 14px;
-  font-family: inherit;
-  resize: vertical;
-  box-sizing: border-box;
-}
-
-.admin-note-input:focus {
-  outline: none;
-  border-color: var(--admin-primary);
-}
-
-.modal-actions {
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.modal-actions h3 {
-  margin-top: 0;
-  margin-bottom: 12px;
-  color: var(--admin-dark);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-
-.action-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
+/* detail-section, admin-note-input, modal-actions, action-buttons, action-button
+   メインスタイルは下部の「報告詳細モーダル - デザイン改善」セクションに統合 */
 
 .action-button.view {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1284,4 +1191,280 @@
   color: #64748b;
   margin-bottom: 24px;
   line-height: 1.6;
+}
+
+/* ==================== 報告管理ページ レイアウト ==================== */
+
+.admin-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #37474f 0%, #263238 100%);
+  padding: 32px 48px;
+  color: #1e293b;
+}
+
+.admin-header {
+  margin-bottom: 32px;
+}
+
+.admin-header .header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 24px 32px;
+}
+
+.admin-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 統計カード - 報告ページ用余白 */
+.admin-container .stats-grid {
+  margin-bottom: 28px;
+}
+
+/* フィルターセクション - ダークテーマ対応 */
+.admin-container .filter-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* テーブル - ダークテーマ上の白カード */
+.admin-container .table-container {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ページネーション - 白テキスト */
+.admin-container .pagination span {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+/* エラーメッセージ - ダークテーマ対応 */
+.admin-container .error-message {
+  background: rgba(254, 242, 242, 0.95);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+/* ==================== 報告詳細モーダル - デザイン改善 ==================== */
+
+.modal-content {
+  background: white;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 800px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4),
+              0 0 1px rgba(0, 0, 0, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  animation: modalPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: center;
+  padding: 0;
+}
+
+.modal-content > h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  padding: 28px 40px;
+  background: linear-gradient(135deg, #455a64 0%, #37474f 100%);
+  border-radius: 24px 24px 0 0;
+  border-bottom: none;
+}
+
+.modal-content > .detail-section {
+  margin: 0 40px 16px 40px;
+}
+
+.modal-content > .detail-section:first-of-type {
+  margin-top: 28px;
+}
+
+.detail-section {
+  background: #f8fafc;
+  padding: 20px 24px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border-left: 4px solid var(--admin-primary);
+  transition: box-shadow 0.2s ease;
+}
+
+.detail-section:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.detail-section h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--admin-dark);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.detail-section p {
+  margin: 8px 0;
+  color: #64748b;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+.detail-section p strong {
+  color: var(--admin-dark);
+  font-weight: 600;
+  min-width: 100px;
+  display: inline-block;
+}
+
+/* 管理者メモ入力 */
+.admin-note-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: white;
+}
+
+.admin-note-input:focus {
+  outline: none;
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.15);
+}
+
+/* モーダルアクションセクション */
+.modal-content > .modal-actions {
+  margin: 0 40px;
+  padding-top: 20px;
+  border-top: 2px solid #f1f5f9;
+}
+
+.modal-actions h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--admin-dark);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* アクションボタン改善 */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.action-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+}
+
+.action-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 閉じるボタン改善 */
+.modal-content > .close-button {
+  width: calc(100% - 80px);
+  margin: 24px 40px 32px 40px;
+  padding: 14px;
+  background: #f1f5f9;
+  color: var(--admin-dark);
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-content > .close-button:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ==================== 報告ページ レスポンシブ ==================== */
+
+@media (max-width: 1024px) {
+  .admin-container {
+    padding: 24px 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 16px;
+  }
+
+  .admin-header .header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    padding: 20px;
+  }
+
+  .admin-title {
+    font-size: 22px;
+  }
+
+  .admin-container .filter-section {
+    padding: 16px;
+  }
+
+  .modal-content > h2 {
+    padding: 24px 24px;
+    font-size: 20px;
+  }
+
+  .modal-content > .detail-section {
+    margin: 0 20px 12px 20px;
+  }
+
+  .modal-content > .modal-actions {
+    margin: 0 20px;
+  }
+
+  .modal-content > .close-button {
+    width: calc(100% - 40px);
+    margin: 20px 20px 24px 20px;
+  }
+
+  .detail-section p strong {
+    display: block;
+    margin-bottom: 2px;
+  }
 }
