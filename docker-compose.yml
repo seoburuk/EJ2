@@ -33,6 +33,9 @@ services:
       AWS_S3_SECRET_KEY: ${AWS_S3_SECRET_KEY}
       AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
       AWS_S3_REGION: ${AWS_S3_REGION:-ap-northeast-2}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
     depends_on:
       - mariadb
     networks:

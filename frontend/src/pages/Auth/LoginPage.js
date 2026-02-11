@@ -13,6 +13,9 @@ function LoginPage() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
+  const [resendSuccess, setResendSuccess] = useState(false);
   const navigate = useNavigate();
 
   // フォーム入力変更ハンドラー
@@ -52,12 +55,38 @@ function LoginPage() {
       }
     } catch (err) {
       if (err.response && err.response.data) {
-        setError(err.response.data.message || 'ログインに失敗しました');
+        const errorMsg = err.response.data.message;
+        const errorCode = err.response.data.errorCode;
+
+        if (errorCode === 'EMAIL_NOT_VERIFIED' || errorMsg === 'EMAIL_NOT_VERIFIED') {
+          setError('メールアドレスが未認証です。受信トレイをご確認ください。');
+          setShowResend(true);
+          setUnverifiedEmail(err.response.data.email || formData.username);
+        } else {
+          setError(errorMsg || 'ログインに失敗しました');
+        }
       } else {
         setError('サーバーとの通信に失敗しました');
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  // メール認証の再送信ハンドラー
+  const handleResendVerification = async () => {
+    try {
+      const response = await axios.post('/api/auth/resend-verification', {
+        email: unverifiedEmail
+      });
+
+      if (response.data.success) {
+        setResendSuccess(true);
+        setError('');
+        setTimeout(() => setResendSuccess(false), 5000);
+      }
+    } catch (err) {
+      setError('認証メールの再送信に失敗しました');
     }
   };
 
@@ -69,6 +98,24 @@ function LoginPage() {
         {error && (
           <div className="auth-error">
             {error}
+          </div>
+        )}
+
+        {showResend && (
+          <div className="resend-verification">
+            <button
+              onClick={handleResendVerification}
+              className="resend-button"
+              type="button"
+            >
+              認証メールを再送信
+            </button>
+          </div>
+        )}
+
+        {resendSuccess && (
+          <div className="success-message">
+            認証メールを再送信しました。受信トレイをご確認ください。
           </div>
         )}
 

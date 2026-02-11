@@ -106,22 +106,8 @@ public class AuthController {
         AuthResponse response = authService.register(request);
 
         if (response.isSuccess()) {
-            // セッションにユーザーIDを保存
-            session.setAttribute("userId", response.getUser().getId());
-            session.setAttribute("user", response.getUser());
-
-            // Spring Security SecurityContext에 인증 정보를 저장한다.
-            UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(response.getUser().getId(),
-                                                        null,
-                                                        Collections.singletonList(new SimpleGrantedAuthority("USER")));
-
-            // Context에 설정
-            SecurityContextHolder.getContext().setAuthentication(authToken);
-
-            // 세션에 Context 저장
-            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
-
+            // メール認証が必要なため、セッションは作成しない
+            // ユーザーはメール認証後にログインする必要がある
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.badRequest().body(response);
@@ -161,6 +147,48 @@ public class AuthController {
     @PostMapping("/password-reset/confirm")
     public ResponseEntity<AuthResponse> confirmPasswordReset(@RequestBody PasswordResetConfirmRequest request) {
         AuthResponse response = authService.confirmPasswordReset(request);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    /**
+     * メールアドレス認証エンドポイント
+     * POST /api/auth/verify-email
+     * @param request メール認証リクエスト（token）
+     * @return 認証レスポンス
+     */
+    @PostMapping("/verify-email")
+    public ResponseEntity<AuthResponse> verifyEmail(@RequestBody EmailVerificationRequest request) {
+        try {
+            AuthResponse response = authService.verifyEmail(request.getToken());
+
+            if (response.isSuccess()) {
+                return ResponseEntity.ok(response);
+            } else {
+                if ("TOKEN_EXPIRED".equals(response.getMessage())) {
+                    return ResponseEntity.badRequest().body(response);
+                }
+                return ResponseEntity.badRequest().body(response);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(new AuthResponse(false, "認証処理中にエラーが発生しました"));
+        }
+    }
+
+    /**
+     * メール認証メール再送信エンドポイント
+     * POST /api/auth/resend-verification
+     * @param request 再送信リクエスト（email）
+     * @return 認証レスポンス
+     */
+    @PostMapping("/resend-verification")
+    public ResponseEntity<AuthResponse> resendVerification(@RequestBody ResendVerificationRequest request) {
+        AuthResponse response = authService.resendVerificationEmail(request.getEmail());
 
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);

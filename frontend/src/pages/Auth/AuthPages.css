@@ -196,6 +196,175 @@
   color: white;
 }
 
+/* アニメーション */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes checkBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* ローディングスピナー */
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+.verification-loading {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.verification-loading p {
+  color: #666;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+/* 成功状態 */
+.verification-success {
+  animation: fadeInScale 0.5s ease-out;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  margin: 0 auto 20px;
+  animation: checkBounce 0.6s ease-in-out;
+}
+
+.verification-message {
+  margin: 20px 0;
+  line-height: 1.6;
+  color: #333;
+}
+
+.verification-message p {
+  margin: 10px 0;
+  font-size: 15px;
+}
+
+.verification-message strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.verification-message .note {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 20px;
+  font-style: italic;
+}
+
+/* エラー状態 */
+.verification-error {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.error-icon {
+  width: 80px;
+  height: 80px;
+  background-color: #f44336;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  margin: 0 auto 20px;
+}
+
+.verification-error h2 {
+  color: #333;
+  font-size: 22px;
+  margin: 20px 0 10px;
+}
+
+.verification-error p {
+  color: #666;
+  font-size: 15px;
+  margin: 10px 0;
+  line-height: 1.6;
+}
+
+/* 成功・エラーメッセージ */
+.success-message {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+  animation: fadeInScale 0.3s ease-out;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* 再送信ボタン */
+.resend-verification {
+  margin: 16px 0;
+  text-align: center;
+}
+
+.resend-button {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.resend-button:hover {
+  background-color: #5a6268;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+.resend-button:active {
+  transform: translateY(0);
+}
+
+/* カウントダウン */
+.countdown {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
 /* レスポンシブデザイン */
 @media (max-width: 768px) {
   .auth-card {
@@ -214,5 +383,23 @@
   .auth-button {
     font-size: 15px;
     padding: 14px 20px;
+  }
+
+  .verification-success,
+  .verification-error,
+  .verification-loading {
+    padding: 30px 15px;
+  }
+
+  .success-icon,
+  .error-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 36px;
+  }
+
+  .verification-message p,
+  .verification-error p {
+    font-size: 14px;
   }
 }

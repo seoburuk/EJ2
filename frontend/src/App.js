@@ -14,6 +14,7 @@ import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import PasswordResetPage from './pages/Auth/PasswordResetPage';
 import FindAccountPage from './pages/Auth/FindAccountPage';
+import EmailVerificationPage from './pages/Auth/EmailVerificationPage';
 import ChatPage from './pages/Chat/ChatPage';
 import AdminPage from './pages/Admin/AdminPage';
 import AdminUsersPage from './pages/Admin/AdminUsersPage';
@@ -234,6 +235,7 @@ function AppContent() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/password-reset" element={<PasswordResetPage />} />
           <Route path="/find-account" element={<FindAccountPage />} />
+          <Route path="/verify-email" element={<EmailVerificationPage />} />
 
           {/* 管理者ページ */}
           <Route path="/admin" element={<AdminPage />} />

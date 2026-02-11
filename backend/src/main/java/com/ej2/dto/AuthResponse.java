@@ -9,6 +9,8 @@ public class AuthResponse {
     private boolean success;
     private String message;
     private User user;
+    private String errorCode;  // エラーコード（EMAIL_NOT_VERIFIED, TOKEN_EXPIRED等）
+    private String email;       // ユーザーのメールアドレス（再送信用）
 
     public AuthResponse() {
     }
@@ -22,6 +24,12 @@ public class AuthResponse {
         this.success = success;
         this.message = message;
         this.user = user;
+    }
+
+    public AuthResponse(boolean success, String message, String email) {
+        this.success = success;
+        this.message = message;
+        this.email = email;
     }
 
     public boolean isSuccess() {
@@ -46,5 +54,21 @@ public class AuthResponse {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
