@@ -98,13 +98,30 @@ public class AuthController {
      * 会員登録エンドポイント
      * POST /api/auth/register
      * @param request 会員登録リクエスト（username, name, email, password）
+     * @param session HTTPセッション
      * @return 認証レスポンス
      */
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request, HttpSession session) {
         AuthResponse response = authService.register(request);
 
         if (response.isSuccess()) {
+            // セッションにユーザーIDを保存
+            session.setAttribute("userId", response.getUser().getId());
+            session.setAttribute("user", response.getUser());
+
+            // Spring Security SecurityContext에 인증 정보를 저장한다.
+            UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(response.getUser().getId(),
+                                                        null,
+                                                        Collections.singletonList(new SimpleGrantedAuthority("USER")));
+
+            // Context에 설정
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            // 세션에 Context 저장
+            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.badRequest().body(response);
