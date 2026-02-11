@@ -83,8 +83,7 @@ public class SecurityConfig {
 
         // 로컬 + 배포주소
         config.addAllowedOriginPattern("http://localhost");
-        config.addAllowedOriginPattern("http://localhost:3000");
-        config.addAllowedOriginPattern("http://52.79.204.202:3000");
+        config.addAllowedOriginPattern("http://elasticjapan.duckdns.org");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         
