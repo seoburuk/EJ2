@@ -35,13 +35,16 @@ export interface TimetableCourse {
 export const DAYS = ['月', '火', '水', '木', '金'] as const;
 
 export const PERIODS = [
-  { number: 1, time: '09:00-10:30' },
-  { number: 2, time: '10:40-12:10' },
-  { number: 3, time: '13:00-14:30' },
-  { number: 4, time: '14:40-16:10' },
-  { number: 5, time: '16:20-17:50' },
-  { number: 6, time: '18:00-19:30' },
-  { number: 7, time: '19:40-21:10' },
+  { number: 1, time: '09:00-09:50' },
+  { number: 2, time: '10:00-10:50' },
+  { number: 3, time: '11:00-11:50' },
+  { number: 4, time: '12:00-12:50' },
+  { number: 5, time: '13:00-13:50' },
+  { number: 6, time: '14:00-14:50' },
+  { number: 7, time: '15:00-15:50' },
+  { number: 8, time: '16:00-16:50' },
+  { number: 9, time: '17:00-17:50' },
+  { number: 10, time: '18:00-18:50' },
 ] as const;
 
 export const COURSE_COLORS = [
