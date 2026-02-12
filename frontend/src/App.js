@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import MainPage from './pages/Main/MainPage';
-import BoardListPage from './pages/Board/BoardListPage';
 import PostListPage from './pages/Board/PostListPage';
 import PostWritePage from './pages/Board/PostWritePage';
 import PostEditPage from './pages/Board/PostEditPage';
@@ -143,16 +142,6 @@ function NavBar() {
             </button>
             {isDropdownOpen && (
               <ul className="nav-dropdown-menu">
-                <li>
-                  <Link
-                    to="/boards"
-                    className="nav-dropdown-item"
-                    onClick={() => setIsDropdownOpen(false)}
-                  >
-                    📋 すべての掲示板
-                  </Link>
-                </li>
-                <li className="nav-dropdown-divider"></li>
                 {boards.map(board => (
                   <li key={board.id}>
                     <button
@@ -221,7 +210,6 @@ function AppContent() {
       <main className={isChatPage ? 'main-content-chat' : 'main-content'}>
         <Routes>
           <Route path="/" element={<MainPage />} />
-          <Route path="/boards" element={<BoardListPage />} />
           <Route path="/boards/:boardId/posts" element={<PostListPage />} />
           <Route path="/boards/:boardId/write" element={<PostWritePage />} />
           <Route path="/boards/:boardId/posts/:postId" element={<PostDetailPage />} />

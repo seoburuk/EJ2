@@ -97,8 +97,8 @@ function PostListPage() {
       <div className="post-list-container">
         <div className="post-list-header">
           <div className="board-title-section">
-            <button className="back-button" onClick={() => navigate('/boards')}>
-              ← 掲示板一覧
+            <button className="back-button" onClick={() => navigate('/')}>
+              ← ホーム
             </button>
             <h2>{board?.name || '掲示板'}</h2>
             {board?.isAnonymous && <span className="anonymous-badge">匿名</span>}
