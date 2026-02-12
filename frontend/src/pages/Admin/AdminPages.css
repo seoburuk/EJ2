@@ -950,58 +950,65 @@
    メインスタイルは下部の「報告詳細モーダル - デザイン改善」セクションに統合 */
 
 .action-button.view {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #a5b4fc 0%, #c4b5fd 100%);
+  color: #4338ca;
+  border: 2px solid #818cf8;
 }
 
 .action-button.view:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(129, 140, 248, 0.4);
+  background: linear-gradient(135deg, #8b9cfc 0%, #b4a5fd 100%);
 }
 
 .action-button.reviewing {
-  background: #3b82f6;
-  color: white;
+  background: linear-gradient(135deg, #93c5fd 0%, #bfdbfe 100%);
+  color: #1e40af;
+  border: 2px solid #60a5fa;
 }
 
 .action-button.reviewing:hover {
-  background: #2563eb;
+  background: linear-gradient(135deg, #7ab5fd 0%, #a5cbfe 100%);
 }
 
 .action-button.dismissed {
-  background: #6b7280;
-  color: white;
+  background: linear-gradient(135deg, #d1d5db 0%, #e5e7eb 100%);
+  color: #374151;
+  border: 2px solid #9ca3af;
 }
 
 .action-button.dismissed:hover {
-  background: #4b5563;
+  background: linear-gradient(135deg, #b1b5bb 0%, #c5c7cb 100%);
 }
 
 .action-button.warning {
-  background: #f59e0b;
-  color: white;
+  background: linear-gradient(135deg, #fcd34d 0%, #fde68a 100%);
+  color: #92400e;
+  border: 2px solid #fbbf24;
 }
 
 .action-button.warning:hover {
-  background: #d97706;
+  background: linear-gradient(135deg, #fcb34d 0%, #fdc68a 100%);
 }
 
 .action-button.danger {
-  background: #ef4444;
-  color: white;
+  background: linear-gradient(135deg, #fca5a5 0%, #fecaca 100%);
+  color: #991b1b;
+  border: 2px solid #f87171;
 }
 
 .action-button.danger:hover {
-  background: #dc2626;
+  background: linear-gradient(135deg, #fc8585 0%, #feaaaa 100%);
 }
 
 .action-button.info {
-  background: #8b5cf6;
-  color: white;
+  background: linear-gradient(135deg, #d8b4fe 0%, #e9d5ff 100%);
+  color: #6b21a8;
+  border: 2px solid #c084fc;
 }
 
 .action-button.info:hover {
-  background: #7c3aed;
+  background: linear-gradient(135deg, #c894fe 0%, #d9b5ff 100%);
 }
 
 .action-button:disabled {
@@ -1436,14 +1443,16 @@
   padding: 16px 18px;
   border: 2px solid #e2e8f0;
   border-radius: 14px;
-  font-size: 14.5px;
+  font-size: 14px;
   font-family: inherit;
   resize: none;
   box-sizing: border-box;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+  background: white;
   line-height: 1.7;
   color: #334155;
+  min-height: 90px;
+  height: auto;
 }
 
 .admin-note-input::placeholder {
@@ -1503,9 +1512,9 @@
 
 /* アクションボタン改善 */
 .action-buttons {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  flex-wrap: wrap;
   margin-bottom: 20px;
 }
 
@@ -1523,6 +1532,8 @@
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.1),
     0 1px 2px rgba(0, 0, 0, 0.06);
+  min-height: 44px;
+  width: 100%;
 }
 
 .action-button::before {
@@ -1704,6 +1715,7 @@
   }
 
   .action-buttons {
+    grid-template-columns: 1fr;
     gap: 10px;
     margin-bottom: 18px;
   }
@@ -1712,6 +1724,7 @@
     padding: 12px 20px;
     font-size: 13px;
     border-radius: 10px;
+    min-height: 48px;
   }
 
   .modal-content > .close-button {
@@ -1726,5 +1739,6 @@
     padding: 14px 16px;
     font-size: 14px;
     border-radius: 12px;
+    min-height: 80px;
   }
 }
