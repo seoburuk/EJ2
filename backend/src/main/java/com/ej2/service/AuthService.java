@@ -47,16 +47,11 @@ public class AuthService {
             return new AuthResponse(false, "ユーザー名またはパスワードが正しくありません");
         }
 
-        System.out.println("入力されたパスワード: " + request.getPassword());
-        System.out.println("DBのハッシュ: " + user.getPassword());
-
         // 3. パスワード検証
         boolean isPasswordValid = PasswordUtil.verifyPassword(
                 request.getPassword(),
                 user.getPassword()
         );
-
-        System.out.println("パスワード検証結果: " + isPasswordValid);
 
         // 4. パスワードが一致しない場合
         if (!isPasswordValid) {
@@ -173,12 +168,15 @@ public class AuthService {
 
         userRepository.save(user);
 
-        // TODO: 実際のアプリケーションでは、ここでメール送信処理を実装
-        // 今回はトークンをレスポンスに含めて返す（開発用）
-        System.out.println("パスワードリセットトークン: " + resetToken);
-        System.out.println("ユーザー: " + user.getEmail());
+        // パスワードリセットメールを送信
+        try {
+            emailService.sendPasswordResetEmail(user.getEmail(), user.getName(), resetToken);
+        } catch (Exception e) {
+            System.err.println("メール送信エラー: " + e.getMessage());
+            // メール送信失敗してもセキュリティ上は成功メッセージを返す
+        }
 
-        return new AuthResponse(true, "リセットトークン: " + resetToken);
+        return new AuthResponse(true, "パスワードリセット用のメールを送信しました。メールをご確認ください。");
     }
 
     /**
