@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FiArrowLeft } from 'react-icons/fi';
 import './PostListPage.css';
 
 function PostListPage() {
@@ -98,10 +99,13 @@ function PostListPage() {
         <div className="post-list-header">
           <div className="board-title-section">
             <button className="back-button" onClick={() => navigate('/')}>
-              ← ホーム
+              <FiArrowLeft size={20} />
+              <span>掲示板一覧</span>
             </button>
-            <h2>{board?.name || '掲示板'}</h2>
-            {board?.isAnonymous && <span className="anonymous-badge">匿名</span>}
+            <div className="board-title-wrapper">
+              <h2>{board?.name || '掲示板'}</h2>
+              {board?.isAnonymous && <span className="anonymous-badge">匿名</span>}
+            </div>
           </div>
 
           <div className="controls-section">

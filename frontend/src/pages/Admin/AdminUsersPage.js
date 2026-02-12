@@ -174,7 +174,7 @@ function AdminUsersPage() {
       {/* ヘッダー */}
       <header className="page-header">
         <Link to="/admin" className="back-link">
-          <FiArrowLeft /> 戻る
+          <FiArrowLeft size={20} /> ダッシュボードに戻る
         </Link>
         <h1><FiUsers /> ユーザー管理</h1>
       </header>

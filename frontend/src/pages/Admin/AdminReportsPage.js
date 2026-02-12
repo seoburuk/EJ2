@@ -227,7 +227,7 @@ function AdminReportsPage() {
             <FiArrowLeft size={20} />
             <span>ダッシュボードに戻る</span>
           </button>
-          <h1 className="admin-title">報告管理</h1>
+          <h1 className="admin-title centered-title">報告管理</h1>
         </div>
       </div>
 
