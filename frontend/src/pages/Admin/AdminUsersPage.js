@@ -104,7 +104,7 @@ function AdminUsersPage() {
 
     try {
       await axios.post(
-        `http://localhost:8080/api/admin/users/${selectedUser.id}/suspend`,
+        `/api/admin/users/${selectedUser.id}/suspend`,
         { duration: suspendDuration, reason: suspendReason },
         { withCredentials: true }
       );
@@ -124,7 +124,7 @@ function AdminUsersPage() {
 
     try {
       await axios.post(
-        `http://localhost:8080/api/admin/users/${userId}/unsuspend`,
+        `/api/admin/users/${userId}/unsuspend`,
         {},
         { withCredentials: true }
       );
