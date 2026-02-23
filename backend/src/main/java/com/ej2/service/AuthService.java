@@ -21,7 +21,11 @@ public class AuthService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     private static final int RESET_TOKEN_EXPIRY_HOURS = 24;
+    private static final int EMAIL_VERIFICATION_EXPIRY_HOURS = 24;
 
     /**
      * ユーザーログイン
@@ -43,23 +47,25 @@ public class AuthService {
             return new AuthResponse(false, "ユーザー名またはパスワードが正しくありません");
         }
 
-        System.out.println("入力されたパスワード: " + request.getPassword());
-        System.out.println("DBのハッシュ: " + user.getPassword());
-
         // 3. パスワード検証
         boolean isPasswordValid = PasswordUtil.verifyPassword(
                 request.getPassword(),
                 user.getPassword()
         );
 
-        System.out.println("パスワード検証結果: " + isPasswordValid);
-
         // 4. パスワードが一致しない場合
         if (!isPasswordValid) {
             return new AuthResponse(false, "ユーザー名またはパスワードが正しくありません");
         }
 
-        // 5. 成功時、ユーザー情報と共に応答を返す
+        // 5. メール認証チェック
+        if (user.getEmailVerified() == null || !user.getEmailVerified()) {
+            AuthResponse response = new AuthResponse(false, "EMAIL_NOT_VERIFIED", user.getEmail());
+            response.setErrorCode("EMAIL_NOT_VERIFIED");
+            return response;
+        }
+
+        // 6. 成功時、ユーザー情報と共に応答を返す
         return new AuthResponse(true, "ログインに成功しました", user);
     }
     /**
@@ -97,10 +103,28 @@ public class AuthService {
                 hashedPassword
         );
 
+        // メール認証トークンを生成
+        String verificationToken = PasswordUtil.generateResetToken();
+        user.setEmailVerified(false);
+        user.setEmailVerificationToken(verificationToken);
+        user.setEmailVerificationTokenExpiry(LocalDateTime.now().plusHours(EMAIL_VERIFICATION_EXPIRY_HOURS));
+
         // ユーザーを保存
         User savedUser = userRepository.save(user);
 
-        return new AuthResponse(true, "会員登録が完了しました", savedUser);
+        // メール認証メールを送信
+        try {
+            emailService.sendVerificationEmail(
+                    savedUser.getEmail(),
+                    savedUser.getName(),
+                    verificationToken
+            );
+        } catch (Exception e) {
+            System.err.println("メール送信エラー: " + e.getMessage());
+            // メール送信失敗してもユーザー登録は成功とする（後で再送信可能）
+        }
+
+        return new AuthResponse(true, "会員登録が完了しました。メールをご確認の上、認証を完了してください", savedUser);
     }
 
     /**
@@ -125,7 +149,7 @@ public class AuthService {
     }
 
     /**
-     * パスワードリセットトークンを生成してメール送信（メール送信は今回は省略）
+     * パスワードリセットトークンを生成してメール送信
      * @param request パスワードリセットリクエスト
      * @return 認証レスポンス
      */
@@ -144,12 +168,15 @@ public class AuthService {
 
         userRepository.save(user);
 
-        // TODO: 実際のアプリケーションでは、ここでメール送信処理を実装
-        // 今回はトークンをレスポンスに含めて返す（開発用）
-        System.out.println("パスワードリセットトークン: " + resetToken);
-        System.out.println("ユーザー: " + user.getEmail());
+        // パスワードリセットメールを送信
+        try {
+            emailService.sendPasswordResetEmail(user.getEmail(), user.getName(), resetToken);
+        } catch (Exception e) {
+            System.err.println("メール送信エラー: " + e.getMessage());
+            // メール送信失敗してもセキュリティ上は成功メッセージを返す
+        }
 
-        return new AuthResponse(true, "リセットトークン: " + resetToken);
+        return new AuthResponse(true, "パスワードリセット用のメールを送信しました。メールをご確認ください。");
     }
 
     /**
@@ -180,5 +207,64 @@ public class AuthService {
         userRepository.save(user);
 
         return new AuthResponse(true, "パスワードが正常にリセットされました");
+    }
+
+    /**
+     * メールアドレス認証
+     * @param token メール認証トークン
+     * @return 認証レスポンス
+     */
+    public AuthResponse verifyEmail(String token) {
+        User user = userRepository.findByEmailVerificationToken(token);
+
+        if (user == null) {
+            return new AuthResponse(false, "無効な認証トークンです");
+        }
+
+        // トークンの有効期限をチェック
+        if (user.getEmailVerificationTokenExpiry() == null ||
+                LocalDateTime.now().isAfter(user.getEmailVerificationTokenExpiry())) {
+            return new AuthResponse(false, "TOKEN_EXPIRED");
+        }
+
+        // メール認証完了
+        user.setEmailVerified(true);
+        user.setEmailVerificationToken(null);
+        user.setEmailVerificationTokenExpiry(null);
+        userRepository.save(user);
+
+        return new AuthResponse(true, "メール認証が完了しました");
+    }
+
+    /**
+     * メール認証メールの再送信
+     * @param email メールアドレス
+     * @return 認証レスポンス
+     */
+    public AuthResponse resendVerificationEmail(String email) {
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            return new AuthResponse(false, "ユーザーが見つかりません");
+        }
+
+        if (user.getEmailVerified() != null && user.getEmailVerified()) {
+            return new AuthResponse(false, "このメールアドレスは既に認証済みです");
+        }
+
+        // 新しい認証トークンを生成
+        String newToken = PasswordUtil.generateResetToken();
+        user.setEmailVerificationToken(newToken);
+        user.setEmailVerificationTokenExpiry(LocalDateTime.now().plusHours(EMAIL_VERIFICATION_EXPIRY_HOURS));
+        userRepository.save(user);
+
+        // メール認証メールを再送信
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), user.getName(), newToken);
+        } catch (Exception e) {
+            System.err.println("メール送信エラー: " + e.getMessage());
+        }
+
+        return new AuthResponse(true, "認証メールを再送信しました");
     }
 }

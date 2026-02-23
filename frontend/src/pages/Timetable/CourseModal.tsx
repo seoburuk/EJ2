@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TimetableCourse, DaySchedule, COURSE_COLORS, DAYS } from '../../types/timetable.ts';
+import { TimetableCourse, DaySchedule, COURSE_COLORS, DAYS, PERIODS } from '../../types/timetable.ts';
 import './CourseModal.css';
 
 interface CourseModalProps {
@@ -212,8 +212,8 @@ const CourseModal: React.FC<CourseModalProps> = ({
                       value={schedule.periodStart}
                       onChange={(e) => updateDaySchedule(schedule.day, 'periodStart', Number(e.target.value))}
                     >
-                      {[1, 2, 3, 4, 5, 6, 7].map(p => (
-                        <option key={p} value={p}>{p}時限</option>
+                      {PERIODS.map(period => (
+                        <option key={period.number} value={period.number}>{period.number}時限</option>
                       ))}
                     </select>
                     <span className="time-separator">~</span>
@@ -221,8 +221,8 @@ const CourseModal: React.FC<CourseModalProps> = ({
                       value={schedule.periodEnd}
                       onChange={(e) => updateDaySchedule(schedule.day, 'periodEnd', Number(e.target.value))}
                     >
-                      {[1, 2, 3, 4, 5, 6, 7].map(p => (
-                        <option key={p} value={p}>{p}時限</option>
+                      {PERIODS.map(period => (
+                        <option key={period.number} value={period.number}>{period.number}時限</option>
                       ))}
                     </select>
                   </div>

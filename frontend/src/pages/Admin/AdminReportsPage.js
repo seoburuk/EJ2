@@ -116,7 +116,7 @@ function AdminReportsPage() {
   // 統計取得
   const fetchStats = useCallback(async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/admin/reports/stats', {
+      const response = await axios.get('/api/admin/reports/stats', {
         withCredentials: true
       });
       setStats(response.data);
@@ -135,7 +135,7 @@ function AdminReportsPage() {
         ...filters
       };
 
-      const response = await axios.get('http://localhost:8080/api/admin/reports', {
+      const response = await axios.get('/api/admin/reports', {
         params,
         withCredentials: true
       });
@@ -155,7 +155,7 @@ function AdminReportsPage() {
   const fetchReportDetail = async (reportId) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/admin/reports/${reportId}`,
+        `/api/admin/reports/${reportId}`,
         { withCredentials: true }
       );
       setSelectedReport(response.data);
@@ -170,7 +170,7 @@ function AdminReportsPage() {
   const handleStatusChange = async (reportId, newStatus) => {
     try {
       await axios.put(
-        `http://localhost:8080/api/admin/reports/${reportId}/status`,
+        `/api/admin/reports/${reportId}/status`,
         { status: newStatus, adminNote: actionNote },
         { withCredentials: true }
       );
@@ -192,7 +192,7 @@ function AdminReportsPage() {
 
     try {
       await axios.post(
-        `http://localhost:8080/api/admin/reports/${reportId}/actions`,
+        `/api/admin/reports/${reportId}/actions`,
         { action, adminNote: actionNote },
         { withCredentials: true }
       );
@@ -227,7 +227,7 @@ function AdminReportsPage() {
             <FiArrowLeft size={20} />
             <span>ダッシュボードに戻る</span>
           </button>
-          <h1 className="admin-title">報告管理</h1>
+          <h1 className="admin-title centered-title">報告管理</h1>
         </div>
       </div>
 

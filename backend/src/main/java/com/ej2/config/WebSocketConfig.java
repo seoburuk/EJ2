@@ -24,6 +24,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws/chat")
                 .setAllowedOrigins("http://localhost")
                 .setAllowedOrigins("http://elasticjapan.duckdns.org")
+                .setAllowedOrigins("https://elasticjapan.duckdns.org")
                 .withSockJS();
     }
 }

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import MainPage from './pages/Main/MainPage';
-import BoardListPage from './pages/Board/BoardListPage';
 import PostListPage from './pages/Board/PostListPage';
 import PostWritePage from './pages/Board/PostWritePage';
 import PostEditPage from './pages/Board/PostEditPage';
@@ -14,6 +13,8 @@ import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import PasswordResetPage from './pages/Auth/PasswordResetPage';
 import FindAccountPage from './pages/Auth/FindAccountPage';
+import EmailVerificationPage from './pages/Auth/EmailVerificationPage';
+import PasswordResetConfirmPage from './pages/Auth/PasswordResetConfirmPage';
 import ChatPage from './pages/Chat/ChatPage';
 import AdminPage from './pages/Admin/AdminPage';
 import AdminUsersPage from './pages/Admin/AdminUsersPage';
@@ -142,16 +143,6 @@ function NavBar() {
             </button>
             {isDropdownOpen && (
               <ul className="nav-dropdown-menu">
-                <li>
-                  <Link
-                    to="/boards"
-                    className="nav-dropdown-item"
-                    onClick={() => setIsDropdownOpen(false)}
-                  >
-                    📋 すべての掲示板
-                  </Link>
-                </li>
-                <li className="nav-dropdown-divider"></li>
                 {boards.map(board => (
                   <li key={board.id}>
                     <button
@@ -220,7 +211,6 @@ function AppContent() {
       <main className={isChatPage ? 'main-content-chat' : 'main-content'}>
         <Routes>
           <Route path="/" element={<MainPage />} />
-          <Route path="/boards" element={<BoardListPage />} />
           <Route path="/boards/:boardId/posts" element={<PostListPage />} />
           <Route path="/boards/:boardId/write" element={<PostWritePage />} />
           <Route path="/boards/:boardId/posts/:postId" element={<PostDetailPage />} />
@@ -233,7 +223,9 @@ function AppContent() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/password-reset" element={<PasswordResetPage />} />
+          <Route path="/password-reset/confirm" element={<PasswordResetConfirmPage />} />
           <Route path="/find-account" element={<FindAccountPage />} />
+          <Route path="/verify-email" element={<EmailVerificationPage />} />
 
           {/* 管理者ページ */}
           <Route path="/admin" element={<AdminPage />} />

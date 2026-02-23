@@ -104,7 +104,7 @@ function AdminUsersPage() {
 
     try {
       await axios.post(
-        `http://localhost:8080/api/admin/users/${selectedUser.id}/suspend`,
+        `/api/admin/users/${selectedUser.id}/suspend`,
         { duration: suspendDuration, reason: suspendReason },
         { withCredentials: true }
       );
@@ -124,7 +124,7 @@ function AdminUsersPage() {
 
     try {
       await axios.post(
-        `http://localhost:8080/api/admin/users/${userId}/unsuspend`,
+        `/api/admin/users/${userId}/unsuspend`,
         {},
         { withCredentials: true }
       );
@@ -174,7 +174,7 @@ function AdminUsersPage() {
       {/* ヘッダー */}
       <header className="page-header">
         <Link to="/admin" className="back-link">
-          <FiArrowLeft /> 戻る
+          <FiArrowLeft size={20} /> ダッシュボードに戻る
         </Link>
         <h1><FiUsers /> ユーザー管理</h1>
       </header>

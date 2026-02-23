@@ -247,7 +247,7 @@ function MainPage() {
           )}
 
           <div className="popular-section-eta">
-            <h3 className="sidebar-title-eta">人気トピック</h3>
+            <h3 className="sidebar-title-eta">👑 人気トピック</h3>
             <div className="popular-list-eta">
               {popularPosts.map((post, index) => (
                 <div

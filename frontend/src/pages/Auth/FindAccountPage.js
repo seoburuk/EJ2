@@ -68,7 +68,8 @@ function FindAccountPage() {
 
       if (response.data.success) {
         setResetSuccess(response.data.message);
-        setStep(2);
+        setResetEmail(''); // 이메일 필드 초기화
+        // setStep(2); // Step 2로 전환하지 않음 - 이메일 링크를 통한 재설정만 사용
       } else {
         setResetError(response.data.message);
       }
